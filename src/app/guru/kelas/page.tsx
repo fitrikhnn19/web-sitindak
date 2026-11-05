@@ -36,10 +36,18 @@ import { NoClassesEmptyState } from "@/components/class-manage/ClassEmptyStates"
 import { CreateAssessmentModal } from "@/components/assessment-manage/CreateAssessmentModal";
 import { TokenManagementModal } from "@/components/assessment-manage/TokenManagementModal";
 import { ScheduleManagementModal } from "@/components/assessment-manage/ScheduleManagementModal";
+import { useTeacherAuth } from "@/lib/useTeacherAuth";
 
 function ClassManagementDashboardContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const { isLoggedIn, isLoading } = useTeacherAuth();
+
+  useEffect(() => {
+    if (!isLoading && !isLoggedIn) {
+      router.push("/guru/masuk");
+    }
+  }, [isLoading, isLoggedIn, router]);
 
   // URL Query Parameters
   const initialClassIdQuery = searchParams.get("id");

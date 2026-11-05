@@ -26,7 +26,7 @@ import { useTeacherAuth } from "@/lib/useTeacherAuth";
 
 function ProfilGuruContent() {
   const router = useRouter();
-  const { teacher, isLoggedIn, updateProfile, resetPassword } = useTeacherAuth();
+  const { teacher, isLoggedIn, isLoading, updateProfile, resetPassword } = useTeacherAuth();
 
   // Form states
   const [name, setName] = useState("");
@@ -47,7 +47,7 @@ function ProfilGuruContent() {
   } | null>(null);
   const [isSaving, setIsSaving] = useState(false);
 
-  // Sync state dari auth session
+  // Sync state dari auth session & route protection
   useEffect(() => {
     if (teacher) {
       setName(teacher.name || "");
@@ -55,8 +55,10 @@ function ProfilGuruContent() {
       setSubject(teacher.subject || "Matematika");
       setNip(teacher.nip || "");
       setBio(teacher.bio || "");
+    } else if (!isLoading && !isLoggedIn) {
+      router.push("/guru/masuk");
     }
-  }, [teacher]);
+  }, [teacher, isLoading, isLoggedIn, router]);
 
   const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();

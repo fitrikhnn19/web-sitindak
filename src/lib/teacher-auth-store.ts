@@ -83,46 +83,57 @@ function translateAuthError(errMessage: string): string {
 
 /**
  * Sinkronisasi sesi aktif saat ini dari Supabase Auth dan tabel profiles
+ * Memverifikasi langsung ke server Supabase apakah akun masih terdaftar
  */
 export async function syncTeacherSessionFromSupabase(): Promise<TeacherProfile | null> {
   if (!isBrowser()) return null;
 
-  try {
-    const supabase = createClient();
-    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+  const supabase = createClient();
 
-    if (sessionError || !session?.user) {
-      // Jika tidak ada sesi valid di Supabase, bersihkan cache lokal
+  try {
+    // 1. Verifikasi langsung ke server Supabase Auth (bukan hanya cache token lokal)
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+
+    if (userError || !user) {
+      // Jika akun sudah dihapus di Supabase auth.users, batalkan sesi dan bersihkan cache
+      await supabase.auth.signOut().catch(() => {});
       setTeacherSession(null);
       return null;
     }
 
-    const user = session.user;
-
-    // Ambil data profil dari tabel profiles
-    const { data: profile } = await supabase
+    // 2. Ambil data profil dari tabel profiles
+    const { data: profile, error: profileError } = await supabase
       .from("profiles")
       .select("*")
       .eq("id", user.id)
       .maybeSingle();
 
+    if (profileError || !profile) {
+      // Jika profil sudah dihapus di tabel profiles Supabase, batalkan sesi dan bersihkan cache
+      await supabase.auth.signOut().catch(() => {});
+      setTeacherSession(null);
+      return null;
+    }
+
     const teacherData: TeacherProfile = {
       id: user.id,
-      name: profile?.full_name || (user.user_metadata?.full_name as string) || user.email?.split("@")[0] || "Guru",
-      email: user.email || profile?.email || "",
-      schoolName: profile?.school_name || (user.user_metadata?.school_name as string) || "",
-      subject: profile?.subject || "Matematika",
-      nip: profile?.nip || "",
-      bio: profile?.bio || "",
-      createdAt: profile?.created_at || user.created_at || new Date().toISOString(),
+      name: profile.full_name || (user.user_metadata?.full_name as string) || "Guru",
+      email: user.email || profile.email || "",
+      schoolName: profile.school_name || (user.user_metadata?.school_name as string) || "",
+      subject: profile.subject || "Matematika",
+      nip: profile.nip || "",
+      bio: profile.bio || "",
+      createdAt: profile.created_at || user.created_at || new Date().toISOString(),
       avatarUrl: "",
     };
 
     setTeacherSession(teacherData);
     return teacherData;
   } catch (err) {
-    console.error("Gagal sinkronisasi sesi dari Supabase:", err);
-    return getCurrentTeacherSession();
+    console.warn("Gagal sinkronisasi sesi dari Supabase:", err);
+    await supabase.auth.signOut().catch(() => {});
+    setTeacherSession(null);
+    return null;
   }
 }
 

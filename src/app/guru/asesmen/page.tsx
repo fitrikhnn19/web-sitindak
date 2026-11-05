@@ -38,10 +38,18 @@ import { TokenManagementModal } from "@/components/assessment-manage/TokenManage
 import { ScheduleManagementModal } from "@/components/assessment-manage/ScheduleManagementModal";
 import { StudentProgressMonitoringModal } from "@/components/assessment-manage/StudentProgressMonitoringModal";
 import { TeacherSessionHeader } from "@/components/dashboard/TeacherSessionHeader";
+import { useTeacherAuth } from "@/lib/useTeacherAuth";
 
 function AssessmentManagementContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const { isLoggedIn, isLoading } = useTeacherAuth();
+
+  useEffect(() => {
+    if (!isLoading && !isLoggedIn) {
+      router.push("/guru/masuk");
+    }
+  }, [isLoading, isLoggedIn, router]);
 
   // State for assessment list
   const [assessments, setAssessments] = useState<AssessmentItem[]>([]);

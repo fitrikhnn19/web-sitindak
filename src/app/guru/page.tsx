@@ -1,7 +1,8 @@
 "use client";
 
-import React, { Suspense } from "react";
+import React, { useEffect, Suspense } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   Compass,
   ArrowRight,
@@ -24,7 +25,14 @@ import { TeacherSessionHeader } from "@/components/dashboard/TeacherSessionHeade
 import { useTeacherAuth } from "@/lib/useTeacherAuth";
 
 function TeacherDashboardHomeContent() {
-  const { teacher, isLoggedIn } = useTeacherAuth();
+  const router = useRouter();
+  const { teacher, isLoggedIn, isLoading } = useTeacherAuth();
+
+  useEffect(() => {
+    if (!isLoading && !isLoggedIn) {
+      router.push("/guru/masuk");
+    }
+  }, [isLoading, isLoggedIn, router]);
 
   const greetingName = teacher?.name || "Bapak/Ibu Guru";
   const schoolDisplay = teacher?.schoolName || "Sekolah Belum Diatur";
