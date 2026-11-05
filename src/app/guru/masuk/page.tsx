@@ -58,7 +58,7 @@ function MasukFormContent() {
       if (res.success) {
         setSuccessMessage(`Berhasil masuk! Mengarahkan ke dasbor...`);
         setTimeout(() => {
-          router.push("/guru/asesmen");
+          router.push("/guru");
         }, 500);
       } else {
         setErrorMessage(res.message);

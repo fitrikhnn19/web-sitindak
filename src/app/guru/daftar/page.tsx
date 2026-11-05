@@ -72,7 +72,7 @@ function DaftarFormContent() {
       if (res.success) {
         setSuccessMessage(`${res.message} Mengarahkan langsung ke dasbor...`);
         setTimeout(() => {
-          router.push("/guru/asesmen");
+          router.push("/guru");
         }, 800);
       } else {
         setErrorMessage(res.message);
