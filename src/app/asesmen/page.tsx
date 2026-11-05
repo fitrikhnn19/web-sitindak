@@ -42,13 +42,14 @@ import { QuestionNavigationPalette } from "@/components/assessment/QuestionNavig
 import { ReviewAnswersList } from "@/components/assessment/ReviewAnswersList";
 import { SubmitConfirmationModal } from "@/components/assessment/SubmitConfirmationModal";
 import { AssessmentResultsFeedback } from "@/components/assessment/AssessmentResultsFeedback";
+import { AssessmentInstructions } from "@/components/assessment/AssessmentInstructions";
 
 function AssessmentContent() {
   const searchParams = useSearchParams();
   const queryToken = searchParams.get("token") || "";
 
-  // View state: 'entry' | 'exam' | 'review' | 'results'
-  const [view, setView] = useState<"entry" | "exam" | "review" | "results">("entry");
+  // View state: 'entry' | 'instructions' | 'exam' | 'review' | 'results'
+  const [view, setView] = useState<"entry" | "instructions" | "exam" | "review" | "results">("entry");
   const [token, setToken] = useState<AssessmentToken | null>(null);
   const [studentName, setStudentName] = useState("");
   const [startedAt, setStartedAt] = useState<string>("");
@@ -322,12 +323,10 @@ function AssessmentContent() {
     };
   }, [view, currentIndex, currentQuestion, token, studentName]);
 
-  // Handle starting session from token entry
-  const handleStartSession = (validToken: AssessmentToken, name: string) => {
-    const nowIso = new Date().toISOString();
+  // Handle moving from token entry to instructions view
+  const handleReadyForInstructions = (validToken: AssessmentToken, name: string) => {
     setToken(validToken);
     setStudentName(name);
-    setStartedAt(nowIso);
     setAnswers({});
     setCurrentIndex(0);
     setCheatingCount(0);
@@ -336,20 +335,34 @@ function AssessmentContent() {
     hasWarned5MinRef.current = false;
     hasWarned1MinRef.current = false;
 
-    if (validToken.durationMinutes && validToken.durationMinutes > 0) {
-      setRemainingSeconds(validToken.durationMinutes * 60);
-    } else {
-      setRemainingSeconds(null);
-    }
-
-    setView("exam");
-
     fetchQuestionsForAssessment(validToken.code).then((loadedQ) => {
       if (loadedQ && loadedQ.length > 0) {
         setExamQuestions(loadedQ);
       }
     });
 
+    setView("instructions");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  // Handle student starting the exam after reading and confirming instructions
+  const handleStartExamFromInstructions = () => {
+    if (!token) return;
+    const nowIso = new Date().toISOString();
+    setStartedAt(nowIso);
+
+    if (token.durationMinutes && token.durationMinutes > 0) {
+      setRemainingSeconds(token.durationMinutes * 60);
+    } else {
+      setRemainingSeconds(null);
+    }
+
+    setView("exam");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const handleBackToEntry = () => {
+    setView("entry");
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -379,7 +392,7 @@ function AssessmentContent() {
         // fallback
       }
     }
-    handleStartSession(validToken, name);
+    handleReadyForInstructions(validToken, name);
   };
 
   const handleAnswerChange = (answer: StudentAnswer) => {
@@ -655,8 +668,21 @@ function AssessmentContent() {
           <div className="max-w-2xl mx-auto py-6 sm:py-12">
             <AssessmentTokenEntry
               initialToken={queryToken}
-              onStartSession={handleStartSession}
+              onStartSession={handleReadyForInstructions}
               onAlreadySubmitted={handleAlreadySubmitted}
+            />
+          </div>
+        )}
+
+        {/* VIEW 1.5: INSTRUCTIONS BEFORE EXAM */}
+        {view === "instructions" && token && (
+          <div className="py-4 sm:py-6">
+            <AssessmentInstructions
+              token={token}
+              studentName={studentName}
+              questionCount={examQuestions.length}
+              onStartExam={handleStartExamFromInstructions}
+              onBackToEntry={handleBackToEntry}
             />
           </div>
         )}
