@@ -102,28 +102,40 @@ export async function syncTeacherSessionFromSupabase(): Promise<TeacherProfile |
     }
 
     // 2. Ambil data profil dari tabel profiles
-    const { data: profile, error: profileError } = await supabase
+    const { data: profile } = await supabase
       .from("profiles")
       .select("*")
       .eq("id", user.id)
       .maybeSingle();
 
-    if (profileError || !profile) {
-      // Jika profil sudah dihapus di tabel profiles Supabase, batalkan sesi dan bersihkan cache
-      await supabase.auth.signOut().catch(() => {});
-      setTeacherSession(null);
-      return null;
+    let activeProfile = profile;
+
+    // Auto-heal: jika user terdaftar di auth.users tapi baris profiles hilang/belum ada
+    if (!activeProfile) {
+      const fallbackName = (user.user_metadata?.full_name as string) || user.email?.split("@")[0] || "Guru";
+      const { data: newProfile } = await supabase
+        .from("profiles")
+        .upsert({
+          id: user.id,
+          email: user.email || "",
+          full_name: fallbackName,
+          school_name: (user.user_metadata?.school_name as string) || "",
+        })
+        .select()
+        .maybeSingle();
+
+      activeProfile = newProfile;
     }
 
     const teacherData: TeacherProfile = {
       id: user.id,
-      name: profile.full_name || (user.user_metadata?.full_name as string) || "Guru",
-      email: user.email || profile.email || "",
-      schoolName: profile.school_name || (user.user_metadata?.school_name as string) || "",
-      subject: profile.subject || "Matematika",
-      nip: profile.nip || "",
-      bio: profile.bio || "",
-      createdAt: profile.created_at || user.created_at || new Date().toISOString(),
+      name: activeProfile?.full_name || (user.user_metadata?.full_name as string) || "Guru",
+      email: user.email || activeProfile?.email || "",
+      schoolName: activeProfile?.school_name || (user.user_metadata?.school_name as string) || "",
+      subject: activeProfile?.subject || "Matematika",
+      nip: activeProfile?.nip || "",
+      bio: activeProfile?.bio || "",
+      createdAt: activeProfile?.created_at || user.created_at || new Date().toISOString(),
       avatarUrl: "",
     };
 
@@ -172,15 +184,32 @@ export async function loginTeacher(email: string, password: string): Promise<Aut
       .eq("id", data.user.id)
       .maybeSingle();
 
+    let activeProfile = profile;
+    if (!activeProfile) {
+      const fallbackName = (data.user.user_metadata?.full_name as string) || cleanEmail.split("@")[0] || "Guru";
+      const { data: newProfile } = await supabase
+        .from("profiles")
+        .upsert({
+          id: data.user.id,
+          email: data.user.email || cleanEmail,
+          full_name: fallbackName,
+          school_name: (data.user.user_metadata?.school_name as string) || "",
+        })
+        .select()
+        .maybeSingle();
+
+      activeProfile = newProfile;
+    }
+
     const teacher: TeacherProfile = {
       id: data.user.id,
-      name: profile?.full_name || (data.user.user_metadata?.full_name as string) || cleanEmail.split("@")[0],
+      name: activeProfile?.full_name || (data.user.user_metadata?.full_name as string) || cleanEmail.split("@")[0],
       email: data.user.email || cleanEmail,
-      schoolName: profile?.school_name || "",
-      subject: profile?.subject || "Matematika",
-      nip: profile?.nip || "",
-      bio: profile?.bio || "",
-      createdAt: profile?.created_at || data.user.created_at || new Date().toISOString(),
+      schoolName: activeProfile?.school_name || "",
+      subject: activeProfile?.subject || "Matematika",
+      nip: activeProfile?.nip || "",
+      bio: activeProfile?.bio || "",
+      createdAt: activeProfile?.created_at || data.user.created_at || new Date().toISOString(),
       avatarUrl: "",
     };
 
