@@ -41,7 +41,6 @@ export const Footer: React.FC = () => {
               <li><a href="#fitur" className="text-slate-600 hover:text-blue-600 transition-colors">Metode 3-Tingkat</a></li>
               <li><a href="#keunggulan" className="text-slate-600 hover:text-blue-600 transition-colors">Keunggulan SITINDAK</a></li>
               <li><a href="#alur-siswa" className="text-slate-600 hover:text-blue-600 transition-colors">Alur Pengerjaan Siswa</a></li>
-              <li><a href="#faq" className="text-slate-600 hover:text-blue-600 transition-colors">Tanya & Jawab (FAQ)</a></li>
             </ul>
           </div>
 

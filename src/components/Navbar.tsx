@@ -31,7 +31,6 @@ export const Navbar: React.FC<NavbarProps> = ({
     { label: "Metode 3-Tingkat", href: "#fitur" },
     { label: "Keunggulan", href: "#keunggulan" },
     { label: "Alur Siswa", href: "#alur-siswa" },
-    { label: "FAQ", href: "#faq" },
   ];
 
   return (

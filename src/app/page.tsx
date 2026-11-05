@@ -5,7 +5,6 @@ import { Navbar } from "@/components/Navbar";
 import { Hero } from "@/components/Hero";
 import { ThreeTierExplanation } from "@/components/ThreeTierExplanation";
 import { StudentExperienceSection } from "@/components/StudentExperienceSection";
-import { TestimonialsFAQ } from "@/components/TestimonialsFAQ";
 import { Footer } from "@/components/Footer";
 import { TokenTesterModal } from "@/components/TokenTesterModal";
 import { TeacherModal } from "@/components/TeacherModal";
@@ -35,9 +34,6 @@ export default function Home() {
       <StudentExperienceSection
         onOpenTokenModal={() => setTokenModalOpen(true)}
       />
-
-      {/* Frequently Asked Questions */}
-      <TestimonialsFAQ />
 
       {/* Footer */}
       <Footer />
