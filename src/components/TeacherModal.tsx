@@ -210,17 +210,6 @@ export const TeacherModal: React.FC<TeacherModalProps> = ({
               <span>{mode === "login" ? "Masuk ke Dasbor Guru" : "Buat Akun Guru Sekarang"}</span>
               <ArrowRight className="w-4 h-4" />
             </button>
-
-            <div className="pt-3 border-t border-slate-100 flex flex-col gap-1.5 text-center">
-              <Link
-                href="/guru"
-                onClick={onClose}
-                className="inline-flex items-center justify-center gap-1.5 text-xs text-blue-600 hover:text-blue-700 font-semibold"
-              >
-                <span>Buka Dasbor Lengkap Guru SITINDAK</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </Link>
-            </div>
           </form>
         ) : (
           <div className="py-4 text-center space-y-4 animate-in fade-in duration-200">
