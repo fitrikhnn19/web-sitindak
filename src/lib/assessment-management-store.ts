@@ -215,6 +215,12 @@ export function getRemainingQuota(token: AssessmentTokenData): number {
 }
 
 function normalizeAssessment(item: AssessmentItem): AssessmentItem {
+  // Hanya masukkan siswa riil yang sudah pernah mengakses (berlangsung atau terkirim)
+  // Buang semua data siswa dummy/tiruan berstatus 'belum_mulai'
+  const realStudents = Array.isArray(item.students)
+    ? item.students.filter((s) => s.status === "berlangsung" || s.status === "terkirim")
+    : [];
+
   return {
     ...item,
     durationMinutes: item.durationMinutes !== undefined ? item.durationMinutes : 45,
@@ -223,6 +229,7 @@ function normalizeAssessment(item: AssessmentItem): AssessmentItem {
     gradeLevel: item.gradeLevel
       ? item.gradeLevel.replace(/SMP\s*Kelas\s*9/gi, "SMA Kelas 11").replace(/SMP/gi, "SMA")
       : "SMA Kelas 11",
+    students: realStudents,
   };
 }
 
@@ -332,8 +339,8 @@ export async function fetchAssessmentsFromSupabase(): Promise<AssessmentItem[]> 
 
         const students =
           matchingCached?.students && matchingCached.students.length > 0
-            ? matchingCached.students
-            : generateMockStudents(className, maxUses, completedCount, inProgressCount);
+            ? matchingCached.students.filter((s) => s.status === "berlangsung" || s.status === "terkirim")
+            : [];
 
         const scheduleStat = deriveScheduleStatus(row.opens_at, row.closes_at);
         const derivedStatus: "berjalan" | "draf" | "selesai" =
@@ -439,7 +446,7 @@ export function createAssessment(data: {
       usedCount: 0,
       expiresAt: data.closesAt,
     },
-    students: generateMockStudents(selectedClass.name, selectedClass.totalStudents, 0, 0),
+    students: [],
   };
 
   const updated = [newAssessment, ...current];

@@ -35,6 +35,7 @@ import {
   fetchQuestionsForAssessment,
   submitStudentAssessmentToSupabase,
   recordCheatingLogToSupabase,
+  recordStudentSessionStart,
 } from "@/lib/student-submission-service";
 import { AssessmentTokenEntry } from "@/components/assessment/AssessmentTokenEntry";
 import { ThreeTierQuestionCard } from "@/components/assessment/ThreeTierQuestionCard";
@@ -356,6 +357,8 @@ function AssessmentContent() {
     } else {
       setRemainingSeconds(null);
     }
+
+    recordStudentSessionStart(token.code, studentName);
 
     setView("exam");
     window.scrollTo({ top: 0, behavior: "smooth" });

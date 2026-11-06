@@ -11,7 +11,7 @@ import {
   MOCK_QUESTIONS,
 } from "./assessment-mock-data";
 import { CheatingEvent } from "./cheating-detection-store";
-import { resolveQuestionUuid, getAllAssessments, saveAssessments } from "./assessment-management-store";
+import { resolveQuestionUuid, getAllAssessments, saveAssessments, StudentProgress } from "./assessment-management-store";
 
 export interface StudentSubmissionPayload {
   tokenCode: string;
@@ -404,5 +404,175 @@ export async function submitStudentAssessmentToSupabase(
       totalScore,
     };
   }
+}
+
+/**
+ * Mencatat sesi pengerjaan siswa yang baru saja memasukkan token (status: berlangsung)
+ */
+export async function recordStudentSessionStart(tokenCode: string, studentName: string): Promise<void> {
+  const cleanToken = tokenCode.trim().toUpperCase();
+  const cleanName = studentName.trim();
+  if (!cleanToken || !cleanName) return;
+
+  const nowIso = new Date().toISOString();
+
+  // 1. Update di local store assessment
+  const allAssessments = getAllAssessments();
+  const targetAssessment = allAssessments.find((a) => a.token.code === cleanToken);
+  if (targetAssessment) {
+    if (!Array.isArray(targetAssessment.students)) {
+      targetAssessment.students = [];
+    }
+    const existing = targetAssessment.students.find(
+      (s) => s.name.toLowerCase() === cleanName.toLowerCase()
+    );
+    if (!existing) {
+      targetAssessment.students.unshift({
+        id: `std-real-${cleanName.toLowerCase().replace(/[^a-z0-9]/g, "")}-${Date.now()}`,
+        name: cleanName,
+        status: "berlangsung",
+        startedAt: nowIso,
+      });
+      targetAssessment.token.usedCount = Math.max(
+        targetAssessment.token.usedCount + 1,
+        targetAssessment.students.length
+      );
+      saveAssessments(allAssessments);
+    }
+  }
+
+  // 2. Simpan/update di Supabase `student_submissions`
+  try {
+    const supabase = createClient();
+    const { data: asm } = await supabase
+      .from("assessments")
+      .select("id, used_count")
+      .eq("token_code", cleanToken)
+      .maybeSingle();
+
+    if (asm) {
+      const studentIdentifier = `std-${cleanName.toLowerCase().replace(/[^a-z0-9]/g, "")}`;
+      const { data: existingSub } = await supabase
+        .from("student_submissions")
+        .select("id, status")
+        .eq("assessment_id", asm.id)
+        .ilike("student_name", cleanName)
+        .maybeSingle();
+
+      if (!existingSub) {
+        await supabase.from("student_submissions").insert({
+          assessment_id: asm.id,
+          student_name: cleanName,
+          student_identifier: studentIdentifier,
+          status: "berlangsung",
+          started_at: nowIso,
+          paham_count: 0,
+          miskonsepsi_count: 0,
+          belum_paham_count: 0,
+          total_score: 0,
+        });
+
+        // Increment used_count di tabel assessments
+        await supabase
+          .from("assessments")
+          .update({
+            used_count: (asm.used_count || 0) + 1,
+          })
+          .eq("id", asm.id);
+      }
+    }
+  } catch (err) {
+    console.warn("Gagal mencatat sesi mulai siswa ke Supabase:", err);
+  }
+}
+
+/**
+ * Mengambil daftar riil siswa yang telah mengakses atau menyelesaikan asesmen
+ */
+export async function fetchAssessmentRealStudents(
+  assessmentId: string,
+  tokenCode: string
+): Promise<StudentProgress[]> {
+  const cleanToken = tokenCode.trim().toUpperCase();
+  const realStudentsMap = new Map<string, StudentProgress>();
+
+  // 1. Ambil dari Supabase `student_submissions`
+  try {
+    const supabase = createClient();
+    let targetId = assessmentId;
+
+    if (!targetId || !targetId.match(/^[0-9a-f]{8}-[0-9a-f]{4}/i)) {
+      const { data: asm } = await supabase
+        .from("assessments")
+        .select("id")
+        .eq("token_code", cleanToken)
+        .maybeSingle();
+      if (asm) targetId = asm.id;
+    }
+
+    if (targetId) {
+      const { data: subs, error } = await supabase
+        .from("student_submissions")
+        .select("*")
+        .eq("assessment_id", targetId)
+        .order("created_at", { ascending: false });
+
+      if (!error && subs && Array.isArray(subs)) {
+        for (const s of subs) {
+          const key = s.student_name.toLowerCase().trim();
+          realStudentsMap.set(key, {
+            id: s.id,
+            name: s.student_name,
+            status: (s.status as "terkirim" | "berlangsung") || "terkirim",
+            startedAt: s.started_at || undefined,
+            submittedAt: s.submitted_at || undefined,
+            durationMinutes: s.duration_minutes ?? undefined,
+            pahamCount: s.paham_count ?? 0,
+            miskonsepsiCount: s.miskonsepsi_count ?? 0,
+            belumPahamCount: s.belum_paham_count ?? 0,
+          });
+        }
+      }
+    }
+  } catch (err) {
+    console.warn("Gagal mengambil siswa dari Supabase:", err);
+  }
+
+  // 2. Baca dari localStorage submissions (fallback & offline)
+  if (typeof window !== "undefined") {
+    try {
+      const prefixUpper = `sitindak_submission_${cleanToken}_`;
+      const prefixLower = `sitindak_submission_${cleanToken.toLowerCase()}_`;
+
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && (key.startsWith(prefixUpper) || key.startsWith(prefixLower))) {
+          const raw = localStorage.getItem(key);
+          if (raw) {
+            try {
+              const parsed = JSON.parse(raw);
+              const nameKey = (parsed.studentName || "").toLowerCase().trim();
+              if (nameKey && !realStudentsMap.has(nameKey)) {
+                realStudentsMap.set(nameKey, {
+                  id: `std-local-${nameKey.replace(/[^a-z0-9]/g, "")}`,
+                  name: parsed.studentName,
+                  status: "terkirim",
+                  startedAt: parsed.startedAt,
+                  submittedAt: parsed.submittedAt,
+                  durationMinutes: parsed.durationMinutes,
+                  pahamCount: parsed.pahamCount ?? 0,
+                  miskonsepsiCount: parsed.miskonsepsiCount ?? 0,
+                  belumPahamCount: parsed.belumPahamCount ?? 0,
+                  cheatingEventsCount: parsed.cheatingCount ?? 0,
+                });
+              }
+            } catch {}
+          }
+        }
+      }
+    } catch {}
+  }
+
+  return Array.from(realStudentsMap.values());
 }
 

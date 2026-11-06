@@ -14,7 +14,7 @@ import {
   Info
 } from "lucide-react";
 import { MOCK_TOKENS, AssessmentToken } from "@/lib/assessment-mock-data";
-import { getAllAssessments, fetchAssessmentsFromSupabase, simulateStudentEntry } from "@/lib/assessment-management-store";
+import { getAllAssessments, fetchAssessmentsFromSupabase } from "@/lib/assessment-management-store";
 
 interface AssessmentTokenEntryProps {
   initialToken?: string;
@@ -174,12 +174,6 @@ export const AssessmentTokenEntry: React.FC<AssessmentTokenEntryProps> = ({
     if (previousSubmission && onAlreadySubmitted) {
       onAlreadySubmitted(validatedToken, cleanedName);
       return;
-    }
-
-    const stored = getAllAssessments();
-    const matched = stored.find((a) => a.token.code === validatedToken.code);
-    if (matched) {
-      simulateStudentEntry(matched.id);
     }
 
     onStartSession(validatedToken, cleanedName);

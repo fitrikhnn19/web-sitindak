@@ -41,8 +41,6 @@ import {
   deriveScheduleStatus,
   getRemainingQuota,
   toggleTokenActive,
-  simulateStudentEntry,
-  simulateStudentSubmit,
   generateWhatsAppShareText,
 } from "@/lib/assessment-management-store";
 import {
@@ -144,34 +142,6 @@ export const ClassWorkspaceView: React.FC<ClassWorkspaceViewProps> = ({
           ? `Token ${updated.token.code} diaktifkan kembali.`
           : `Token ${updated.token.code} telah dinonaktifkan.`
       );
-    }
-  };
-
-  // Simulate Student Entry
-  const handleSimulateEntry = (assessmentId: string) => {
-    const res = simulateStudentEntry(assessmentId);
-    if (res.success && res.assessment) {
-      onAssessmentUpdated(res.assessment);
-      onShowToast(res.message);
-    } else {
-      onShowToast(res.message);
-    }
-  };
-
-  // Simulate Student Submission
-  const handleSimulateSubmit = (assessmentId: string) => {
-    if (!currentAssessment) return;
-    const inProgress = currentAssessment.students.find((s) => s.status === "berlangsung");
-    if (!inProgress) {
-      onShowToast("Tidak ada siswa yang berstatus 'berlangsung'. Coba simulasi siswa masuk terlebih dahulu.");
-      return;
-    }
-    const res = simulateStudentSubmit(assessmentId, inProgress.id);
-    if (res.success && res.assessment) {
-      onAssessmentUpdated(res.assessment);
-      onShowToast(res.message);
-    } else {
-      onShowToast(res.message);
     }
   };
 
@@ -544,29 +514,6 @@ export const ClassWorkspaceView: React.FC<ClassWorkspaceViewProps> = ({
                         </p>
                       </div>
                     </div>
-                  </div>
-
-                  {/* Interactive Simulation CTAs (for demo testing) */}
-                  <div className="flex flex-wrap items-center gap-2 bg-slate-50 border border-slate-200 p-1.5 rounded-lg">
-                    <span className="text-[11px] font-semibold text-slate-500 px-2 hidden sm:inline">
-                      Simulasi:
-                    </span>
-                    <button
-                      onClick={() => handleSimulateEntry(currentAssessment.id)}
-                      className="px-2.5 py-1 rounded-md bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 text-xs font-semibold transition-colors flex items-center gap-1.5 shadow-sm"
-                      title="Simulasikan 1 siswa baru memasukkan token dan mulai mengerjakan"
-                    >
-                      <PlayCircle className="w-3.5 h-3.5 text-blue-600" />
-                      <span>Siswa Masuk (+1)</span>
-                    </button>
-                    <button
-                      onClick={() => handleSimulateSubmit(currentAssessment.id)}
-                      className="px-2.5 py-1 rounded-md bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 text-xs font-semibold transition-colors flex items-center gap-1.5 shadow-sm"
-                      title="Simulasikan 1 siswa yang sedang berlangsung mengirim jawaban"
-                    >
-                      <CheckCircle className="w-3.5 h-3.5 text-emerald-600" />
-                      <span>Siswa Kirim (+1)</span>
-                    </button>
                   </div>
                 </div>
 
