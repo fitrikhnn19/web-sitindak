@@ -290,7 +290,7 @@ export const TeacherSessionHeader: React.FC<TeacherSessionHeaderProps> = ({
                     Masuk Akun Guru
                   </Link>
                   <Link
-                    href="/guru/masuk?mode=register"
+                    href="/guru/daftar"
                     className="hidden sm:inline-flex px-3 py-1.5 rounded-lg bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold transition-colors border border-slate-300"
                   >
                     Daftar Baru

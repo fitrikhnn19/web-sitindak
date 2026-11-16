@@ -78,9 +78,6 @@ function translateAuthError(errMessage: string): string {
   if (lower.includes("rate limit") || lower.includes("too many requests")) {
     return "Terlalu banyak percobaan. Harap tunggu beberapa saat sebelum mencoba kembali.";
   }
-  if (lower.includes("provider is not enabled") || lower.includes("unsupported provider")) {
-    return "Layanan masuk dengan Google belum diaktifkan di dashboard Supabase (Authentication > Providers > Google). Silakan gunakan email dan kata sandi atau aktifkan Google Provider.";
-  }
   return errMessage || "Terjadi kesalahan pada sistem autentikasi.";
 }
 
@@ -226,48 +223,6 @@ export async function loginTeacher(email: string, password: string): Promise<Aut
   } catch (err: unknown) {
     console.error("Kesalahan proses masuk guru:", err);
     const msg = err instanceof Error ? err.message : "Terjadi gangguan koneksi ke server.";
-    return {
-      success: false,
-      message: msg,
-    };
-  }
-}
-
-/**
- * Sub-fitur Masuk dengan Akun Google via Supabase OAuth
- */
-export async function loginWithGoogle(): Promise<{ success: boolean; message: string }> {
-  try {
-    const supabase = createClient();
-    const redirectTo = typeof window !== "undefined"
-      ? `${window.location.origin}/guru`
-      : undefined;
-
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: {
-        redirectTo,
-        queryParams: {
-          access_type: "offline",
-          prompt: "consent",
-        },
-      },
-    });
-
-    if (error) {
-      return {
-        success: false,
-        message: translateAuthError(error.message || "Gagal menghubungkan ke layanan Google."),
-      };
-    }
-
-    return {
-      success: true,
-      message: "Mengarahkan ke Google...",
-    };
-  } catch (err: unknown) {
-    console.error("Kesalahan proses masuk Google:", err);
-    const msg = err instanceof Error ? err.message : "Terjadi kesalahan saat masuk dengan Google.";
     return {
       success: false,
       message: msg,
