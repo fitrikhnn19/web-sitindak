@@ -87,10 +87,10 @@ export const QuestionDetailModal: React.FC<QuestionDetailModalProps> = ({
         </div>
 
         {/* Tab Selector */}
-        <div className="flex border-b border-slate-200 bg-slate-50/40 px-6 pt-2">
+        <div className="flex border-b border-slate-200 bg-slate-50/40 px-4 sm:px-6 pt-2 overflow-x-auto scrollbar-none shrink-0 gap-1">
           <button
             onClick={() => setActiveTab("soal")}
-            className={`py-2.5 px-4 text-xs font-bold border-b-2 transition-all ${activeTab === "soal"
+            className={`py-2 px-3 sm:py-2.5 sm:px-4 text-xs font-bold border-b-2 whitespace-nowrap shrink-0 transition-all ${activeTab === "soal"
               ? "border-blue-600 text-blue-700"
               : "border-transparent text-slate-500 hover:text-slate-900"
               }`}
@@ -99,7 +99,7 @@ export const QuestionDetailModal: React.FC<QuestionDetailModalProps> = ({
           </button>
           <button
             onClick={() => setActiveTab("pembahasan")}
-            className={`py-2.5 px-4 text-xs font-bold border-b-2 transition-all ${activeTab === "pembahasan"
+            className={`py-2 px-3 sm:py-2.5 sm:px-4 text-xs font-bold border-b-2 whitespace-nowrap shrink-0 transition-all ${activeTab === "pembahasan"
               ? "border-blue-600 text-blue-700"
               : "border-transparent text-slate-500 hover:text-slate-900"
               }`}
@@ -108,7 +108,7 @@ export const QuestionDetailModal: React.FC<QuestionDetailModalProps> = ({
           </button>
           <button
             onClick={() => setActiveTab("distribusi")}
-            className={`py-2.5 px-4 text-xs font-bold border-b-2 transition-all ${activeTab === "distribusi"
+            className={`py-2 px-3 sm:py-2.5 sm:px-4 text-xs font-bold border-b-2 whitespace-nowrap shrink-0 transition-all ${activeTab === "distribusi"
               ? "border-blue-600 text-blue-700"
               : "border-transparent text-slate-500 hover:text-slate-900"
               }`}

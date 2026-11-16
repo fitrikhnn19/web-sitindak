@@ -18,12 +18,12 @@ export const PsychometricGlossaryModal: React.FC<PsychometricGlossaryModalProps>
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl bg-white border border-slate-200 p-6 sm:p-8 shadow-xl space-y-6 text-slate-800">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200">
+      <div className="relative w-full max-w-2xl max-h-[94vh] sm:max-h-[90vh] flex flex-col rounded-2xl bg-white border border-slate-200 shadow-xl overflow-hidden text-slate-800">
         {/* Header */}
-        <div className="flex items-start justify-between gap-4 border-b border-slate-200 pb-4">
+        <div className="flex items-center justify-between p-4 sm:p-5 border-b border-slate-200 bg-slate-50/80 shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 border border-blue-200 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 border border-blue-200 flex items-center justify-center shrink-0">
               <BookOpen className="w-5 h-5" />
             </div>
             <div>
@@ -43,8 +43,8 @@ export const PsychometricGlossaryModal: React.FC<PsychometricGlossaryModalProps>
           </button>
         </div>
 
-        {/* Content sections */}
-        <div className="space-y-5 text-xs sm:text-sm leading-relaxed">
+        {/* Scrollable Content Body */}
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-5 text-xs sm:text-sm leading-relaxed">
           {/* Section 1: Tingkat Kesukaran */}
           <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
             <div className="flex items-center justify-between">
@@ -144,11 +144,11 @@ export const PsychometricGlossaryModal: React.FC<PsychometricGlossaryModalProps>
           </div>
         </div>
 
-        {/* Modal Footer */}
-        <div className="pt-4 border-t border-slate-200 flex justify-end">
+        {/* Modal Footer (Pinned) */}
+        <div className="p-3.5 sm:p-4 border-t border-slate-200 bg-slate-50/90 flex justify-end shrink-0">
           <button
             onClick={onClose}
-            className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs shadow-xs transition-colors"
+            className="w-full sm:w-auto px-5 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs shadow-xs transition-colors"
           >
             Mengerti & Tutup
           </button>

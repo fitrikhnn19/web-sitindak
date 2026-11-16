@@ -18,6 +18,10 @@ import {
   LogOut,
   Building2,
   CheckCircle2,
+  Menu,
+  X,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
 import { ClassAssessmentSummary } from "@/lib/teacher-results-mock-data";
 import { useTeacherAuth } from "@/lib/useTeacherAuth";
@@ -49,6 +53,8 @@ export const TeacherResultsHeader: React.FC<TeacherResultsHeaderProps> = ({
   const router = useRouter();
   const { teacher, isLoggedIn, logout } = useTeacherAuth();
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isMetaExpandedMobile, setIsMetaExpandedMobile] = useState(false);
 
   const [optionsList, setOptionsList] = useState<AssessmentOption[]>(() => {
     if (assessmentOptions && assessmentOptions.length > 0) return assessmentOptions;
@@ -88,78 +94,50 @@ export const TeacherResultsHeader: React.FC<TeacherResultsHeaderProps> = ({
 
   return (
     <>
-      <header className="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-sm print:static print:border-none print:shadow-none">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5">
-          {/* Top bar: Back link, branding & actions */}
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
+      <header className="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-xs print:static print:border-none print:shadow-none">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-2.5 sm:py-3.5">
+          {/* Top bar: Back link, branding, token selector & desktop actions */}
+          <div className="flex items-center justify-between gap-2 sm:gap-4">
+            
+            {/* Left: Back & Branding */}
+            <div className="flex items-center gap-2 sm:gap-3 shrink-0">
               <Link
                 href="/guru"
-                className="p-2 rounded-lg bg-slate-50 border border-slate-200 text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors"
+                className="p-1.5 sm:p-2 rounded-lg bg-slate-50 border border-slate-200 text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors"
                 title="Kembali ke Dasbor Guru"
               >
                 <ArrowLeft className="w-4 h-4" />
               </Link>
 
-              <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-lg bg-blue-600 flex items-center justify-center text-white shadow-sm">
-                  <Compass className="w-5 h-5 text-white" />
+              <div className="flex items-center gap-2 sm:gap-2.5">
+                <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-blue-600 flex items-center justify-center text-white shadow-xs shrink-0">
+                  <Compass className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                 </div>
                 <div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-base sm:text-lg font-bold text-slate-900 tracking-tight">
+                  <div className="flex items-center gap-1.5 sm:gap-2">
+                    <span className="text-sm sm:text-lg font-bold text-slate-900 tracking-tight">
                       SITINDAK
                     </span>
-                    <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200">
-                      Dasbor Guru
+                    <span className="text-[9px] sm:text-[10px] font-semibold px-1.5 sm:px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200">
+                      Hasil
                     </span>
                   </div>
-                  <p className="text-[11px] text-slate-500 hidden sm:block">
-                    Profil Pemahaman Siswa & Diagnostik Tiga Tingkat
+                  <p className="text-[10px] sm:text-[11px] text-slate-500 hidden md:block">
+                    Profil Pemahaman & Diagnostik Tiga Tingkat
                   </p>
                 </div>
               </div>
             </div>
 
-            {/* Action buttons: Nav Links, Download & Profil */}
-            <div className="flex flex-wrap items-center gap-2 print:hidden">
-              {/* Link to Assessment & Token Management */}
-              <Link
-                href="/guru/asesmen"
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-white border border-slate-300 text-slate-700 hover:text-blue-700 hover:bg-slate-50 transition-colors shadow-sm"
-                title="Kelola Asesmen & Token Kelas"
-              >
-                <KeyRound className="w-3.5 h-3.5 text-blue-600" />
-                <span className="hidden sm:inline">Asesmen & Token</span>
-              </Link>
-
-              {/* Link to Question Bank */}
-              <Link
-                href="/guru/soal"
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-white border border-slate-300 text-slate-700 hover:text-blue-700 hover:bg-slate-50 transition-colors shadow-sm"
-                title="Buka Bank Soal Tiga Tingkat"
-              >
-                <Layers className="w-3.5 h-3.5 text-blue-600" />
-                <span className="hidden sm:inline">Bank Soal</span>
-              </Link>
-
-              {/* Link to Question Quality Analysis */}
-              <Link
-                href={`/guru/analisis-soal?token=${selectedToken}`}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-white border border-slate-300 text-slate-700 hover:text-blue-700 hover:bg-slate-50 transition-colors shadow-sm"
-                title="Analisis Kualitas Soal"
-              >
-                <CheckCircle2 className="w-3.5 h-3.5 text-blue-600" />
-                <span className="hidden sm:inline">Kualitas Soal</span>
-              </Link>
-
-              {/* Assessment / Class selector */}
-              <div className="relative">
+            {/* Middle: Assessment / Class selector (Compact & Responsive) */}
+            <div className="flex items-center gap-2 min-w-0">
+              <div className="relative flex-1 max-w-[150px] sm:max-w-[200px]">
                 <select
                   value={selectedToken}
                   onChange={(e) => onSelectToken(e.target.value)}
-                  className="text-xs font-semibold py-1.5 pl-2.5 pr-7 rounded-lg bg-slate-50 border border-slate-300 text-slate-800 hover:border-blue-500 focus:outline-none focus:border-blue-600 focus:bg-white transition-colors cursor-pointer max-w-[190px] truncate"
+                  className="w-full text-xs font-semibold py-1.5 pl-2 sm:pl-2.5 pr-6 sm:pr-7 rounded-lg bg-slate-50 border border-slate-300 text-slate-800 hover:border-blue-500 focus:outline-none focus:border-blue-600 focus:bg-white transition-colors cursor-pointer truncate shadow-xs"
                   title="Pilih Token Asesmen Kelas"
+                  aria-label="Pilih Token Asesmen Kelas"
                 >
                   {!optionsList.some((o) => o.tokenCode === selectedToken) && (
                     <option value={selectedToken}>
@@ -174,94 +152,230 @@ export const TeacherResultsHeader: React.FC<TeacherResultsHeaderProps> = ({
                 </select>
               </div>
 
-              {/* Print Button */}
-              <button
-                onClick={onPrintPage}
-                className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold rounded-lg bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 transition-colors shadow-sm"
-                title="Cetak Halaman ini"
-              >
-                <BookOpen className="w-3.5 h-3.5 text-slate-500" />
-                <span className="hidden md:inline">Cetak</span>
-              </button>
-
-              {/* Unduh Hasil Button */}
+              {/* Unduh button: Always visible because it's primary action */}
               <button
                 onClick={onOpenDownloadModal}
-                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold rounded-lg text-white bg-blue-600 hover:bg-blue-700 shadow-sm transition-all"
+                className="inline-flex items-center gap-1.5 px-2.5 sm:px-3.5 py-1.5 text-xs font-semibold rounded-lg text-white bg-blue-600 hover:bg-blue-700 shadow-xs transition-all shrink-0"
               >
                 <Download className="w-3.5 h-3.5 text-white" />
-                <span>Unduh Hasil</span>
+                <span className="hidden sm:inline">Unduh Hasil</span>
               </button>
+            </div>
 
-              <div className="h-4 w-px bg-slate-200 mx-0.5 hidden sm:block" />
-
-              {/* Profile Guru Link */}
+            {/* Desktop-only action links */}
+            <div className="hidden lg:flex items-center gap-2 print:hidden shrink-0">
               <Link
-                href="/guru/profil"
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 transition-colors"
-                title="Atur Profil & Sekolah Guru"
+                href="/guru/asesmen"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-white border border-slate-300 text-slate-700 hover:text-blue-700 hover:bg-slate-50 transition-colors shadow-xs"
               >
-                <User className="w-3.5 h-3.5 text-blue-600" />
-                <span className="hidden lg:inline">{currentTeacherName.split(" ")[0]}</span>
+                <KeyRound className="w-3.5 h-3.5 text-blue-600" />
+                <span>Asesmen & Token</span>
               </Link>
 
-              {/* Logout Button */}
+              <Link
+                href="/guru/soal"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-white border border-slate-300 text-slate-700 hover:text-blue-700 hover:bg-slate-50 transition-colors shadow-xs"
+              >
+                <Layers className="w-3.5 h-3.5 text-blue-600" />
+                <span>Bank Soal</span>
+              </Link>
+
+              <Link
+                href={`/guru/analisis-soal?token=${selectedToken}`}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-white border border-slate-300 text-slate-700 hover:text-blue-700 hover:bg-slate-50 transition-colors shadow-xs"
+              >
+                <CheckCircle2 className="w-3.5 h-3.5 text-blue-600" />
+                <span>Kualitas Soal</span>
+              </Link>
+
+              <button
+                onClick={onPrintPage}
+                className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold rounded-lg bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 transition-colors shadow-xs"
+              >
+                <BookOpen className="w-3.5 h-3.5 text-slate-500" />
+                <span>Cetak</span>
+              </button>
+
+              <div className="h-4 w-px bg-slate-200 mx-0.5" />
+
+              <Link
+                href="/guru/profil"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 transition-colors shadow-xs"
+              >
+                <User className="w-3.5 h-3.5 text-blue-600" />
+                <span>{currentTeacherName.split(" ")[0]}</span>
+              </Link>
+
               {isLoggedIn && (
                 <button
                   onClick={() => setShowLogoutConfirm(true)}
-                  className="p-1.5 rounded-lg bg-white hover:bg-rose-50 hover:text-rose-600 text-slate-500 border border-slate-300 transition-colors"
+                  className="p-1.5 rounded-lg bg-white hover:bg-rose-50 hover:text-rose-600 text-slate-500 border border-slate-300 transition-colors shadow-xs"
                   title="Keluar dari akun guru"
                 >
                   <LogOut className="w-3.5 h-3.5" />
                 </button>
               )}
             </div>
+
+            {/* Mobile Hamburger Menu Toggle */}
+            <button
+              type="button"
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="lg:hidden p-2 rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 transition-colors shrink-0"
+              aria-label="Menu navigasi"
+            >
+              {isMobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
+            </button>
+
           </div>
 
-          {/* Assessment Metadata Banner */}
-          <div className="mt-4 pt-3.5 border-t border-slate-200 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-600">
-            <div className="space-y-1">
-              <div className="flex items-center gap-2 flex-wrap">
-                <h1 className="text-sm sm:text-base font-bold text-slate-900">
+          {/* Mobile Accordion Menu */}
+          {isMobileMenuOpen && (
+            <div className="lg:hidden mt-2.5 pt-2.5 border-t border-slate-200 space-y-1 animate-in fade-in duration-150">
+              <Link
+                href="/guru"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-slate-700 hover:bg-slate-50"
+              >
+                <Compass className="w-4 h-4 text-blue-600" />
+                <span>Dasbor Utama Guru</span>
+              </Link>
+
+              <Link
+                href="/guru/asesmen"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-slate-700 hover:bg-slate-50"
+              >
+                <KeyRound className="w-4 h-4 text-blue-600" />
+                <span>Kelola Asesmen & Token Kelas</span>
+              </Link>
+
+              <Link
+                href="/guru/soal"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-slate-700 hover:bg-slate-50"
+              >
+                <Layers className="w-4 h-4 text-blue-600" />
+                <span>Bank Soal 3-Tier</span>
+              </Link>
+
+              <Link
+                href={`/guru/analisis-soal?token=${selectedToken}`}
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-slate-700 hover:bg-slate-50"
+              >
+                <CheckCircle2 className="w-4 h-4 text-blue-600" />
+                <span>Analisis Kualitas Soal</span>
+              </Link>
+
+              <Link
+                href="/asesmen"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-blue-700 bg-blue-50/60"
+              >
+                <KeyRound className="w-4 h-4 text-blue-600" />
+                <span>Uji Coba Layar Siswa</span>
+              </Link>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                  onPrintPage();
+                }}
+                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-slate-700 hover:bg-slate-50 text-left"
+              >
+                <BookOpen className="w-4 h-4 text-slate-500" />
+                <span>Cetak Halaman Ini</span>
+              </button>
+
+              <div className="border-t border-slate-100 my-1 pt-1 flex items-center justify-between">
+                <Link
+                  href="/guru/profil"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="flex items-center gap-2 px-3 py-2 text-xs font-semibold text-slate-700 hover:text-blue-600"
+                >
+                  <User className="w-4 h-4 text-blue-600" />
+                  <span>Profil: {currentTeacherName.split(" ")[0]}</span>
+                </Link>
+
+                {isLoggedIn && (
+                  <button
+                    onClick={() => {
+                      setIsMobileMenuOpen(false);
+                      setShowLogoutConfirm(true);
+                    }}
+                    className="px-3 py-1.5 text-xs font-semibold text-rose-600 hover:bg-rose-50 rounded-lg flex items-center gap-1.5"
+                  >
+                    <LogOut className="w-3.5 h-3.5" />
+                    <span>Keluar</span>
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Assessment Metadata Banner (Compact & Collapsible on Mobile) */}
+          <div className="mt-2 sm:mt-3 pt-2 sm:pt-3 border-t border-slate-100 text-xs text-slate-600">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              {/* Title & Token Pill */}
+              <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                <h1 className="text-xs sm:text-sm font-bold text-slate-900 truncate max-w-[220px] sm:max-w-none">
                   {summary.assessmentTitle}
                 </h1>
-                <span className="px-2 py-0.5 rounded-md text-[11px] font-semibold bg-blue-50 border border-blue-200 text-blue-700">
+                <span className="px-1.5 sm:px-2 py-0.5 rounded text-[10px] sm:text-[11px] font-semibold bg-blue-50 border border-blue-200 text-blue-700">
                   {summary.className}
                 </span>
-                <span className="px-2 py-0.5 rounded-md text-[11px] font-mono font-medium bg-slate-100 text-slate-700 border border-slate-200">
+                <span className="px-1.5 sm:px-2 py-0.5 rounded text-[10px] sm:text-[11px] font-mono font-medium bg-slate-100 text-slate-700 border border-slate-200">
                   Token: <strong className="text-blue-700">{summary.tokenCode}</strong>
                 </span>
+
+                {/* Mobile Info Toggle */}
+                <button
+                  type="button"
+                  onClick={() => setIsMetaExpandedMobile(!isMetaExpandedMobile)}
+                  className="sm:hidden text-[10px] text-blue-600 font-semibold inline-flex items-center gap-0.5 ml-1"
+                >
+                  <span>{isMetaExpandedMobile ? "Tutup Info" : "Detail Info"}</span>
+                  {isMetaExpandedMobile ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+                </button>
               </div>
-              <div className="flex items-center gap-4 text-slate-500 text-[11px] flex-wrap">
-                <span className="flex items-center gap-1.5">
-                  <GraduationCap className="w-3.5 h-3.5 text-slate-400" />
-                  <span>Pengampu: {currentTeacherName}</span>
-                </span>
-                <span className="flex items-center gap-1.5">
-                  <Users className="w-3.5 h-3.5 text-slate-400" />
-                  <span>Partisipasi: <strong className="text-slate-900">{summary.completedCount}</strong> dari {summary.totalQuota} siswa ({Math.round((summary.completedCount / summary.totalQuota) * 100)}%)</span>
-                </span>
-                <span className="flex items-center gap-1.5">
-                  <Calendar className="w-3.5 h-3.5 text-slate-400" />
-                  <span>Jadwal: 1 Nov – 10 Nov 2026</span>
+
+              {/* Status Pill */}
+              <div className="hidden sm:flex items-center gap-2">
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                  Sesi Berjalan
                 </span>
               </div>
             </div>
 
-            <div className="flex items-center gap-2">
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                Sesi Berjalan
+            {/* Extra details: Always on desktop, collapsible on mobile */}
+            <div className={`flex items-center gap-4 text-slate-500 text-[11px] flex-wrap mt-1.5 ${isMetaExpandedMobile ? "flex" : "hidden sm:flex"}`}>
+              <span className="flex items-center gap-1.5">
+                <GraduationCap className="w-3.5 h-3.5 text-slate-400" />
+                <span>Pengampu: {currentTeacherName}</span>
+              </span>
+              <span className="flex items-center gap-1.5">
+                <Users className="w-3.5 h-3.5 text-slate-400" />
+                <span>
+                  Partisipasi: <strong className="text-slate-900">{summary.completedCount}</strong>/{summary.totalQuota} siswa ({Math.round((summary.completedCount / Math.max(1, summary.totalQuota)) * 100)}%)
+                </span>
+              </span>
+              <span className="flex items-center gap-1.5">
+                <Calendar className="w-3.5 h-3.5 text-slate-400" />
+                <span>Jadwal: 1 Nov – 10 Nov 2026</span>
               </span>
             </div>
           </div>
+
         </div>
       </header>
 
       {/* Logout Confirmation Modal */}
       {showLogoutConfirm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="relative w-full max-w-sm rounded-2xl bg-white border border-slate-200 p-6 shadow-xl text-center space-y-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="relative w-full max-w-sm rounded-2xl bg-white border border-slate-200 p-6 shadow-xl text-center space-y-4 max-h-[92vh] overflow-y-auto">
             <div className="w-12 h-12 rounded-xl bg-rose-50 text-rose-600 border border-rose-200 flex items-center justify-center mx-auto">
               <LogOut className="w-6 h-6" />
             </div>

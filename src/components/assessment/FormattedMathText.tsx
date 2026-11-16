@@ -32,7 +32,7 @@ export const FormattedMathText: React.FC<FormattedMathTextProps> = ({
             return (
               <span
                 key={index}
-                className="inline-block mx-0.5 align-middle"
+                className="inline-block mx-0.5 align-middle max-w-full overflow-x-auto scrollbar-none"
                 dangerouslySetInnerHTML={{ __html: html }}
               />
             );
@@ -53,7 +53,7 @@ export const FormattedMathText: React.FC<FormattedMathTextProps> = ({
         });
         return (
           <span
-            className="inline-block align-middle"
+            className="inline-block align-middle max-w-full overflow-x-auto scrollbar-none"
             dangerouslySetInnerHTML={{ __html: html }}
           />
         );
@@ -68,4 +68,3 @@ export const FormattedMathText: React.FC<FormattedMathTextProps> = ({
 
   return <span className={className}>{content}</span>;
 };
-

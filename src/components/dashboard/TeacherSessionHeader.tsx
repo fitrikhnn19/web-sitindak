@@ -27,7 +27,7 @@ import {
 import { useTeacherAuth } from "@/lib/useTeacherAuth";
 
 interface TeacherSessionHeaderProps {
-  currentModule?: "dasbor" | "kelas" | "asesmen" | "soal" | "hasil" | "kualitas" | "profil";
+  currentModule?: "dasbor" | "kelas" | "asesmen" | "soal" | "hasil" | "kualitas" | "profil" | "kecurangan";
   title?: string;
   subtitle?: string;
 }

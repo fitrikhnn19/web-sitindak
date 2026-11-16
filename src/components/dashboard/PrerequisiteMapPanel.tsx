@@ -103,10 +103,10 @@ export const PrerequisiteMapPanel: React.FC<PrerequisiteMapPanelProps> = ({
 
       {/* Filter Tabs */}
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex rounded-lg bg-slate-100 p-0.5 border border-slate-200 text-xs">
+        <div className="flex max-w-full overflow-x-auto scrollbar-none rounded-lg bg-slate-100 p-0.5 border border-slate-200 text-xs">
           <button
             onClick={() => setSelectedTopicFilter("all")}
-            className={`px-3 py-1.5 rounded-md font-semibold transition-all ${
+            className={`px-3 py-1.5 rounded-md font-semibold transition-all shrink-0 ${
               selectedTopicFilter === "all"
                 ? "bg-white text-slate-900 shadow-xs"
                 : "text-slate-600 hover:text-slate-900"
@@ -116,7 +116,7 @@ export const PrerequisiteMapPanel: React.FC<PrerequisiteMapPanelProps> = ({
           </button>
           <button
             onClick={() => setSelectedTopicFilter("Sangat Butuh Pengulangan")}
-            className={`px-3 py-1.5 rounded-md font-semibold transition-all ${
+            className={`px-3 py-1.5 rounded-md font-semibold transition-all shrink-0 ${
               selectedTopicFilter === "Sangat Butuh Pengulangan"
                 ? "bg-rose-100 text-rose-800 shadow-xs"
                 : "text-slate-600 hover:text-rose-800"
@@ -126,7 +126,7 @@ export const PrerequisiteMapPanel: React.FC<PrerequisiteMapPanelProps> = ({
           </button>
           <button
             onClick={() => setSelectedTopicFilter("Butuh Pengulangan")}
-            className={`px-3 py-1.5 rounded-md font-semibold transition-all ${
+            className={`px-3 py-1.5 rounded-md font-semibold transition-all shrink-0 ${
               selectedTopicFilter === "Butuh Pengulangan"
                 ? "bg-amber-100 text-amber-900 shadow-xs"
                 : "text-slate-600 hover:text-amber-800"
@@ -136,7 +136,7 @@ export const PrerequisiteMapPanel: React.FC<PrerequisiteMapPanelProps> = ({
           </button>
           <button
             onClick={() => setSelectedTopicFilter("Tuntas / Siap Lanjut")}
-            className={`px-3 py-1.5 rounded-md font-semibold transition-all ${
+            className={`px-3 py-1.5 rounded-md font-semibold transition-all shrink-0 ${
               selectedTopicFilter === "Tuntas / Siap Lanjut"
                 ? "bg-emerald-100 text-emerald-900 shadow-xs"
                 : "text-slate-600 hover:text-emerald-800"

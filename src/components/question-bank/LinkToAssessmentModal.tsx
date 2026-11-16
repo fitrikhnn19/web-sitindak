@@ -52,13 +52,13 @@ export const LinkToAssessmentModal: React.FC<LinkToAssessmentModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200 overflow-y-auto">
-      <div className="relative w-full max-w-2xl rounded-2xl bg-white border border-slate-200 shadow-xl overflow-hidden my-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200">
+      <div className="relative w-full max-w-2xl max-h-[94vh] sm:max-h-[90vh] flex flex-col rounded-2xl bg-white border border-slate-200 shadow-xl overflow-hidden">
         
         {/* Header */}
-        <div className="px-6 py-4 border-b border-slate-200 bg-slate-50/70 flex items-center justify-between">
+        <div className="px-5 py-4 border-b border-slate-200 bg-slate-50/70 flex items-center justify-between shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center shadow-sm">
+            <div className="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center shadow-sm shrink-0">
               <Link2 className="w-5 h-5 text-white" />
             </div>
             <div>
@@ -80,8 +80,8 @@ export const LinkToAssessmentModal: React.FC<LinkToAssessmentModalProps> = ({
           </button>
         </div>
 
-        {/* Content */}
-        <div className="p-6 space-y-5">
+        {/* Content (Scrollable Body) */}
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-5">
           {!isSubmitted ? (
             <>
               {/* Selected Questions Summary Banner */}
@@ -194,7 +194,7 @@ export const LinkToAssessmentModal: React.FC<LinkToAssessmentModalProps> = ({
 
         {/* Footer */}
         {!isSubmitted && (
-          <div className="px-6 py-4 border-t border-slate-200 bg-slate-50/70 flex items-center justify-between">
+          <div className="px-5 py-3.5 border-t border-slate-200 bg-slate-50/90 flex items-center justify-between shrink-0">
             <button
               type="button"
               onClick={onClose}

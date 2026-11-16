@@ -129,18 +129,18 @@ export const ScheduleManagementModal: React.FC<ScheduleManagementModalProps> = (
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-slate-900/50 backdrop-blur-sm overflow-y-auto animate-in fade-in duration-200">
-      <div className="relative w-full max-w-xl bg-white border border-slate-200 rounded-2xl p-5 sm:p-7 shadow-xl my-8">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-200">
+      <div className="relative w-full max-w-xl max-h-[94vh] sm:max-h-[90vh] flex flex-col bg-white border border-slate-200 rounded-2xl shadow-xl overflow-hidden">
         
         {/* Modal Header */}
-        <div className="flex items-center justify-between pb-4 border-b border-slate-100">
+        <div className="flex items-center justify-between p-4 sm:p-5 border-b border-slate-100 shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-blue-50 border border-blue-200 flex items-center justify-center text-blue-700">
+            <div className="w-10 h-10 rounded-xl bg-blue-50 border border-blue-200 flex items-center justify-center text-blue-700 shrink-0">
               <Calendar className="w-5 h-5" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h2 className="text-lg sm:text-xl font-bold text-slate-900">
+                <h2 className="text-base sm:text-lg font-bold text-slate-900">
                   Jadwal & Durasi Pengerjaan Asesmen
                 </h2>
                 <span className="text-[10px] px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 font-semibold border border-blue-200">
@@ -161,21 +161,22 @@ export const ScheduleManagementModal: React.FC<ScheduleManagementModalProps> = (
           </button>
         </div>
 
-        {saveSuccessMsg && (
-          <div className="mt-4 p-3 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs flex items-center gap-2">
-            <Check className="w-4 h-4 shrink-0 text-emerald-600" />
-            <span>{saveSuccessMsg}</span>
-          </div>
-        )}
+        <form onSubmit={handleSubmit} className="flex-1 flex flex-col min-h-0 overflow-hidden">
+          {/* Scrollable Body */}
+          <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-5">
+            {saveSuccessMsg && (
+              <div className="p-3 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs flex items-center gap-2">
+                <Check className="w-4 h-4 shrink-0 text-emerald-600" />
+                <span>{saveSuccessMsg}</span>
+              </div>
+            )}
 
-        {errorMessage && (
-          <div className="mt-4 p-3 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-center gap-2">
-            <AlertCircle className="w-4 h-4 shrink-0 text-rose-600" />
-            <span>{errorMessage}</span>
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} className="mt-5 space-y-5">
+            {errorMessage && (
+              <div className="p-3 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 shrink-0 text-rose-600" />
+                <span>{errorMessage}</span>
+              </div>
+            )}
           
           {/* Current Status Preview Box */}
           <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between gap-3">
@@ -337,8 +338,10 @@ export const ScheduleManagementModal: React.FC<ScheduleManagementModalProps> = (
             🛡️ <strong>Aturan Akses Siswa:</strong> Siswa yang mencoba masuk sebelum jadwal buka atau setelah jadwal tutup akan menerima pesan penolakan yang informatif tanpa membocorkan isi butir soal diagnostik.
           </div>
 
-          {/* Action buttons */}
-          <div className="pt-2 flex items-center justify-end gap-3">
+          </div>
+
+          {/* Action buttons (Pinned Footer) */}
+          <div className="p-3.5 sm:p-4 border-t border-slate-100 bg-slate-50/90 flex items-center justify-end gap-2.5 shrink-0">
             <button
               type="button"
               onClick={onClose}

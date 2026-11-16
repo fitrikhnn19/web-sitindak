@@ -27,7 +27,7 @@ import {
   AssessmentItem,
   getAllAssessments,
 } from "@/lib/assessment-management-store";
-import { ClassDashboardHeader } from "@/components/class-manage/ClassDashboardHeader";
+import { TeacherSessionHeader } from "@/components/dashboard/TeacherSessionHeader";
 import { ClassListCard } from "@/components/class-manage/ClassListCard";
 import { ClassWorkspaceView } from "@/components/class-manage/ClassWorkspaceView";
 import { AddEditClassModal } from "@/components/class-manage/AddEditClassModal";
@@ -235,11 +235,10 @@ function ClassManagementDashboardContent() {
     <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col font-sans">
 
       {/* 1. Header Navigation */}
-      <ClassDashboardHeader
-        classes={classes}
-        selectedClassId={selectedClassId}
-        onSelectClass={handleSelectClass}
-        onOpenAddModal={handleOpenAddModal}
+      <TeacherSessionHeader
+        currentModule="kelas"
+        title="Kelola Ruang Kelas"
+        subtitle="Kelola Kelas & Ruang Asesmen Terpisah"
       />
 
       {/* 2. Main Container */}

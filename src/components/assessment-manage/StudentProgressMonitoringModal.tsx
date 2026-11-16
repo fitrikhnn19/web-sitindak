@@ -134,18 +134,18 @@ export const StudentProgressMonitoringModal: React.FC<StudentProgressMonitoringM
   const inProgressPct = totalAccessed > 0 ? Math.round((inProgressCount / totalAccessed) * 100) : 0;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-slate-900/50 backdrop-blur-sm overflow-y-auto animate-in fade-in duration-200">
-      <div className="relative w-full max-w-4xl bg-white border border-slate-200 rounded-2xl p-5 sm:p-7 shadow-xl my-8 flex flex-col max-h-[90vh]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-200">
+      <div className="relative w-full max-w-4xl max-h-[94vh] sm:max-h-[90vh] flex flex-col rounded-2xl bg-white border border-slate-200 shadow-xl overflow-hidden">
         
         {/* Header Modal */}
-        <div className="flex items-center justify-between pb-4 border-b border-slate-100 shrink-0">
+        <div className="flex items-center justify-between p-4 sm:p-5 border-b border-slate-100 shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-blue-50 border border-blue-200 flex items-center justify-center text-blue-700">
+            <div className="w-10 h-10 rounded-xl bg-blue-50 border border-blue-200 flex items-center justify-center text-blue-700 shrink-0">
               <Users className="w-5 h-5" />
             </div>
             <div>
               <div className="flex items-center gap-2 flex-wrap">
-                <h2 className="text-lg sm:text-xl font-bold text-slate-900">
+                <h2 className="text-base sm:text-lg font-bold text-slate-900">
                   Pemantauan Pengerjaan Siswa
                 </h2>
                 <span className="text-[10px] px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 font-semibold border border-blue-200">
@@ -170,8 +170,10 @@ export const StudentProgressMonitoringModal: React.FC<StudentProgressMonitoringM
           </button>
         </div>
 
-        {/* 4 Summary Stat Cards */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 my-4 shrink-0">
+        {/* Scrollable Container for Stats, Filters & Student List */}
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4">
+          {/* 4 Summary Stat Cards */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {/* Siswa Mengakses */}
           <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
             <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider block">
@@ -469,15 +471,16 @@ export const StudentProgressMonitoringModal: React.FC<StudentProgressMonitoringM
             })
           )}
         </div>
+        </div>
 
         {/* Footer */}
-        <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500 shrink-0 mt-3">
-          <p>
+        <div className="p-3.5 sm:p-4 border-t border-slate-100 bg-slate-50/90 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500 shrink-0">
+          <p className="text-[11px] text-slate-500">
             *Daftar nama dan status diperbarui otomatis secara real-time saat siswa mengakses atau mengirim jawaban.
           </p>
           <button
             onClick={onClose}
-            className="px-4 py-2 rounded-lg bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 font-semibold text-xs shadow-sm"
+            className="w-full sm:w-auto px-4 py-2 rounded-lg bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 font-semibold text-xs shadow-sm"
           >
             Tutup
           </button>

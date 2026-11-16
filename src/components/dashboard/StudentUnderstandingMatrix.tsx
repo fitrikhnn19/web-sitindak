@@ -9,6 +9,8 @@ import {
   Info,
   FileText,
   ShieldAlert,
+  LayoutGrid,
+  Table as TableIcon,
 } from "lucide-react";
 import {
   ClassAssessmentSummary,
@@ -32,6 +34,7 @@ export const StudentUnderstandingMatrix: React.FC<StudentUnderstandingMatrixProp
   const [searchQuery, setSearchQuery] = useState("");
   const [filterCategory, setFilterCategory] = useState<FilterCategory>("all");
   const [sortOption, setSortOption] = useState<SortOption>("name-asc");
+  const [viewMode, setViewMode] = useState<"table" | "cards">("table");
   const [activeTooltip, setActiveTooltip] = useState<string | null>(null);
 
   // Filter & sort students
@@ -116,13 +119,13 @@ export const StudentUnderstandingMatrix: React.FC<StudentUnderstandingMatrixProp
           />
         </div>
 
-        {/* Filters */}
+        {/* Filters & View Switcher */}
         <div className="flex flex-wrap items-center gap-2">
           {/* Quick Filter buttons */}
-          <div className="flex rounded-lg bg-slate-100 p-0.5 border border-slate-200 text-xs">
+          <div className="flex max-w-full overflow-x-auto scrollbar-none rounded-lg bg-slate-100 p-0.5 border border-slate-200 text-xs">
             <button
               onClick={() => setFilterCategory("all")}
-              className={`px-3 py-1.5 rounded-md font-semibold transition-all ${
+              className={`px-3 py-1.5 rounded-md font-semibold transition-all shrink-0 ${
                 filterCategory === "all"
                   ? "bg-white text-slate-900 shadow-xs"
                   : "text-slate-600 hover:text-slate-900"
@@ -132,7 +135,7 @@ export const StudentUnderstandingMatrix: React.FC<StudentUnderstandingMatrixProp
             </button>
             <button
               onClick={() => setFilterCategory("misconception")}
-              className={`px-3 py-1.5 rounded-md font-semibold transition-all ${
+              className={`px-3 py-1.5 rounded-md font-semibold transition-all shrink-0 ${
                 filterCategory === "misconception"
                   ? "bg-amber-100 text-amber-900 shadow-xs"
                   : "text-slate-600 hover:text-amber-800"
@@ -142,7 +145,7 @@ export const StudentUnderstandingMatrix: React.FC<StudentUnderstandingMatrixProp
             </button>
             <button
               onClick={() => setFilterCategory("unmastered")}
-              className={`px-3 py-1.5 rounded-md font-semibold transition-all ${
+              className={`px-3 py-1.5 rounded-md font-semibold transition-all shrink-0 ${
                 filterCategory === "unmastered"
                   ? "bg-slate-200 text-slate-800 shadow-xs"
                   : "text-slate-600 hover:text-slate-800"
@@ -152,7 +155,7 @@ export const StudentUnderstandingMatrix: React.FC<StudentUnderstandingMatrixProp
             </button>
             <button
               onClick={() => setFilterCategory("mastered")}
-              className={`px-3 py-1.5 rounded-md font-semibold transition-all ${
+              className={`px-3 py-1.5 rounded-md font-semibold transition-all shrink-0 ${
                 filterCategory === "mastered"
                   ? "bg-emerald-100 text-emerald-900 shadow-xs"
                   : "text-slate-600 hover:text-emerald-800"
@@ -175,18 +178,163 @@ export const StudentUnderstandingMatrix: React.FC<StudentUnderstandingMatrixProp
               <option value="paham-desc">Urutkan: Pemahaman Terbanyak</option>
             </select>
           </div>
+
+          {/* View Mode Toggle: Tabel vs Kartu Siswa (HP) */}
+          <div className="flex rounded-lg bg-slate-100 p-0.5 border border-slate-200 text-xs shrink-0">
+            <button
+              onClick={() => setViewMode("table")}
+              className={`px-2.5 py-1.5 rounded-md font-semibold transition-all flex items-center gap-1.5 ${
+                viewMode === "table"
+                  ? "bg-white text-blue-700 shadow-xs"
+                  : "text-slate-600 hover:text-slate-900"
+              }`}
+              title="Tampilan Tabel Matriks Penuh"
+            >
+              <TableIcon className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Tabel</span>
+            </button>
+            <button
+              onClick={() => setViewMode("cards")}
+              className={`px-2.5 py-1.5 rounded-md font-semibold transition-all flex items-center gap-1.5 ${
+                viewMode === "cards"
+                  ? "bg-white text-blue-700 shadow-xs"
+                  : "text-slate-600 hover:text-slate-900"
+              }`}
+              title="Tampilan Kartu Siswa Responsif HP"
+            >
+              <LayoutGrid className="w-3.5 h-3.5" />
+              <span>Kartu HP</span>
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* Main Table: Matriks Siswa vs Butir Soal */}
-      <div className="rounded-xl bg-white border border-slate-200 overflow-hidden shadow-sm">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse text-xs">
-            <thead>
-              <tr className="bg-slate-50 border-b border-slate-200 text-slate-700 font-bold uppercase tracking-wider text-[11px]">
-                <th className="py-3.5 px-4 min-w-[200px] sticky left-0 z-20 bg-slate-50 shadow-xs">
-                  Nama Siswa
-                </th>
+      {/* Conditionally Render Cards View or Table View */}
+      {viewMode === "cards" ? (
+        <div className="space-y-3">
+          {filteredStudents.length === 0 ? (
+            <div className="p-8 text-center rounded-xl bg-white border border-slate-200 text-slate-400 text-xs shadow-sm italic">
+              Tidak ada siswa yang sesuai dengan filter pencarian.
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">
+              {filteredStudents.map((student, idx) => (
+                <div
+                  key={student.id}
+                  className="p-4 rounded-xl bg-white border border-slate-200 shadow-sm hover:border-blue-300 transition-all flex flex-col justify-between gap-3"
+                >
+                  {/* Header: Nama Siswa & Waktu / Integritas */}
+                  <div>
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex items-center gap-2">
+                        <span className="w-5 h-5 rounded-full bg-slate-100 text-slate-600 font-bold text-[10px] flex items-center justify-center shrink-0">
+                          {idx + 1}
+                        </span>
+                        <button
+                          onClick={() => onViewStudentReport(student.id)}
+                          className="font-bold text-slate-900 hover:text-blue-600 text-left text-sm transition-colors"
+                        >
+                          {student.studentName}
+                        </button>
+                      </div>
+                      {student.cheatingEventsCount > 0 && (
+                        <span
+                          className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200 shrink-0"
+                          title={`${student.cheatingEventsCount} kali terdeteksi pindah tab`}
+                        >
+                          <ShieldAlert className="w-3 h-3" />
+                          <span>{student.cheatingEventsCount}x</span>
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-[11px] text-slate-500 mt-1 ml-7">
+                      {student.durationMinutes} menit pengerjaan • Selesai
+                    </p>
+                  </div>
+
+                  {/* Score & Profile Summary */}
+                  <div className="grid grid-cols-2 gap-2 p-2.5 rounded-lg bg-slate-50 border border-slate-100 text-xs">
+                    <div>
+                      <span className="text-[10px] text-slate-500 block">Skor (T1 & T2)</span>
+                      <span className="font-mono font-bold text-slate-900">
+                        T1: {student.tier1Score}/{summary.totalQuestions} • T2: {student.tier2Score}
+                      </span>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-[10px] text-slate-500 block">Profil Konsepsi</span>
+                      <div className="inline-flex items-center gap-1 mt-0.5">
+                        <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                          {student.pahamCount}P
+                        </span>
+                        <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-200">
+                          {student.miskonsepsiCount}M
+                        </span>
+                        <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200">
+                          {student.belumPahamCount}B
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Question Quick Grid (Q1..Q10) */}
+                  <div>
+                    <div className="flex items-center justify-between text-[10px] text-slate-500 font-medium mb-1.5">
+                      <span>Rincian Butir (Klik untuk cek soal):</span>
+                    </div>
+                    <div className="grid grid-cols-5 gap-1.5">
+                      {student.itemResults.map((item) => {
+                        const badge = getStatusBadge(item.status);
+                        return (
+                          <button
+                            key={item.questionId}
+                            onClick={() => onSelectQuestion(item.questionId)}
+                            className={`py-1.5 px-1 rounded-md border text-[10px] font-bold flex flex-col items-center justify-center transition-all ${badge.bg}`}
+                            title={`Q${item.questionNumber}: ${badge.label} (Klik untuk naskah soal)`}
+                          >
+                            <span>Q{item.questionNumber}</span>
+                            <span className="text-[9px] font-medium leading-none mt-0.5">
+                              {item.status === "paham" ? "P" : item.status === "miskonsepsi" ? "M" : "B"}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Action Button */}
+                  <button
+                    onClick={() => onViewStudentReport(student.id)}
+                    className="w-full py-2 px-3 rounded-lg bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-700 font-semibold text-xs transition-colors flex items-center justify-center gap-1.5 shadow-xs"
+                  >
+                    <FileText className="w-3.5 h-3.5" />
+                    <span>Lihat Rincian Laporan Siswa</span>
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      ) : (
+        /* Main Table: Matriks Siswa vs Butir Soal */
+        <div className="rounded-xl bg-white border border-slate-200 overflow-hidden shadow-sm">
+          {/* Mobile Swipe Guidance Banner */}
+          <div className="md:hidden flex items-center justify-between px-3 py-2 bg-blue-50 border-b border-blue-100 text-[11px] text-blue-800">
+            <span>💡 Geser tabel ke kanan untuk melihat Q1 s/d Q10</span>
+            <button
+              onClick={() => setViewMode("cards")}
+              className="font-bold underline text-blue-700 hover:text-blue-900 shrink-0 ml-1"
+            >
+              Buka Mode Kartu
+            </button>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr className="bg-slate-50 border-b border-slate-200 text-slate-700 font-bold uppercase tracking-wider text-[11px]">
+                  <th className="py-3.5 px-3 sm:px-4 min-w-[130px] sm:min-w-[200px] sticky left-0 z-20 bg-slate-50 shadow-xs">
+                    Nama Siswa
+                  </th>
                 <th className="py-3.5 px-3 text-center min-w-[90px]">
                   Skor (T1/T2)
                 </th>
@@ -445,6 +593,7 @@ export const StudentUnderstandingMatrix: React.FC<StudentUnderstandingMatrixProp
           </div>
         </div>
       </div>
+      )}
     </div>
   );
 };

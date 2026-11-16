@@ -113,18 +113,18 @@ export const TokenManagementModal: React.FC<TokenManagementModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-slate-900/50 backdrop-blur-sm overflow-y-auto animate-in fade-in duration-200">
-      <div className="relative w-full max-w-2xl bg-white border border-slate-200 rounded-2xl p-5 sm:p-7 shadow-xl my-8">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-200">
+      <div className="relative w-full max-w-2xl max-h-[94vh] sm:max-h-[90vh] flex flex-col bg-white border border-slate-200 rounded-2xl shadow-xl overflow-hidden">
 
         {/* Modal Header */}
-        <div className="flex items-center justify-between pb-4 border-b border-slate-100">
+        <div className="flex items-center justify-between p-4 sm:p-5 border-b border-slate-100 shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-blue-50 border border-blue-200 flex items-center justify-center text-blue-700">
+            <div className="w-10 h-10 rounded-xl bg-blue-50 border border-blue-200 flex items-center justify-center text-blue-700 shrink-0">
               <KeyRound className="w-5 h-5" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h2 className="text-lg sm:text-xl font-bold text-slate-900">
+                <h2 className="text-base sm:text-lg font-bold text-slate-900">
                   Panel Token Kelas
                 </h2>
                 <span className="text-[10px] px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 font-semibold border border-blue-200">
@@ -145,34 +145,36 @@ export const TokenManagementModal: React.FC<TokenManagementModalProps> = ({
           </button>
         </div>
 
-        {/* Tab Switcher */}
-        <div className="flex rounded-lg bg-slate-100 p-1 border border-slate-200 mt-4 mb-5">
-          <button
-            onClick={() => setActiveTab("token")}
-            className={`flex-1 py-1.5 text-xs font-semibold rounded-md transition-all flex items-center justify-center gap-1.5 ${activeTab === "token"
-              ? "bg-white text-blue-700 shadow-sm"
-              : "text-slate-600 hover:text-slate-900"
-              }`}
-          >
-            <KeyRound className="w-3.5 h-3.5" />
-            <span>Pengaturan Token & Kuota</span>
-          </button>
-          <button
-            onClick={() => setActiveTab("share")}
-            className={`flex-1 py-1.5 text-xs font-semibold rounded-md transition-all flex items-center justify-center gap-1.5 ${activeTab === "share"
-              ? "bg-white text-blue-700 shadow-sm"
-              : "text-slate-600 hover:text-slate-900"
-              }`}
-          >
-            <Share2 className="w-3.5 h-3.5" />
-            <span>Bagikan ke Grup Siswa (WhatsApp)</span>
-          </button>
-        </div>
+        {/* Scrollable Modal Body */}
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-5">
+          {/* Tab Switcher */}
+          <div className="flex rounded-lg bg-slate-100 p-1 border border-slate-200 mb-5">
+            <button
+              onClick={() => setActiveTab("token")}
+              className={`flex-1 py-1.5 text-xs font-semibold rounded-md transition-all flex items-center justify-center gap-1.5 ${activeTab === "token"
+                ? "bg-white text-blue-700 shadow-sm"
+                : "text-slate-600 hover:text-slate-900"
+                }`}
+            >
+              <KeyRound className="w-3.5 h-3.5" />
+              <span>Pengaturan Token & Kuota</span>
+            </button>
+            <button
+              onClick={() => setActiveTab("share")}
+              className={`flex-1 py-1.5 text-xs font-semibold rounded-md transition-all flex items-center justify-center gap-1.5 ${activeTab === "share"
+                ? "bg-white text-blue-700 shadow-sm"
+                : "text-slate-600 hover:text-slate-900"
+                }`}
+            >
+              <Share2 className="w-3.5 h-3.5" />
+              <span>Bagikan ke Grup Siswa (WhatsApp)</span>
+            </button>
+          </div>
 
-        {saveSuccessMsg && (
-          <div className="mb-4 p-3 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs flex items-center gap-2">
-            <Check className="w-4 h-4 shrink-0 text-emerald-600" />
-            <span>{saveSuccessMsg}</span>
+          {saveSuccessMsg && (
+            <div className="mb-4 p-3 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs flex items-center gap-2">
+              <Check className="w-4 h-4 shrink-0 text-emerald-600" />
+              <span>{saveSuccessMsg}</span>
           </div>
         )}
 
@@ -409,6 +411,8 @@ export const TokenManagementModal: React.FC<TokenManagementModalProps> = ({
             </div>
           </div>
         )}
+
+        </div>
 
       </div>
     </div>

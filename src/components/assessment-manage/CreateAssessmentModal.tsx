@@ -222,17 +222,17 @@ export const CreateAssessmentModal: React.FC<CreateAssessmentModalProps> = ({
   const selectedClass = availableClasses.find((c) => c.id === selectedClassId);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-slate-900/50 backdrop-blur-sm overflow-y-auto animate-in fade-in duration-200">
-      <div className="relative w-full max-w-4xl bg-white border border-slate-200 rounded-2xl p-5 sm:p-7 shadow-xl my-8">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-200">
+      <div className="relative w-full max-w-4xl max-h-[94vh] sm:max-h-[90vh] flex flex-col bg-white border border-slate-200 rounded-2xl shadow-xl overflow-hidden">
 
         {/* Header */}
-        <div className="flex items-center justify-between pb-4 border-b border-slate-100">
+        <div className="flex items-center justify-between p-4 sm:p-5 border-b border-slate-100 shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-blue-50 border border-blue-200 flex items-center justify-center text-blue-700">
+            <div className="w-10 h-10 rounded-xl bg-blue-50 border border-blue-200 flex items-center justify-center text-blue-700 shrink-0">
               <Plus className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-lg sm:text-xl font-bold text-slate-900">
+              <h2 className="text-base sm:text-lg font-bold text-slate-900">
                 Buat Asesmen Baru
               </h2>
               <p className="text-xs text-slate-500">
@@ -249,42 +249,44 @@ export const CreateAssessmentModal: React.FC<CreateAssessmentModalProps> = ({
           </button>
         </div>
 
-        {/* Guidance if 0 classes exist */}
-        {availableClasses.length === 0 && (
-          <div className="mt-4 p-4 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div className="flex items-start gap-2.5">
-              <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-amber-600" />
-              <div>
-                <p className="font-semibold text-slate-900">Belum Ada Kelas yang Terdaftar</p>
-                <p className="text-[11px] text-amber-800 mt-0.5 leading-relaxed">
-                  Asesmen diagnostik dan token pengerjaan wajib dikaitkan dengan satu kelas yang Anda ampu. Silakan tambahkan kelas terlebih dahulu sebelum membuat asesmen.
-                </p>
+        <form onSubmit={handleSubmit} className="flex-1 flex flex-col min-h-0 overflow-hidden">
+          {/* Scrollable Body */}
+          <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6">
+
+            {/* Guidance if 0 classes exist */}
+            {availableClasses.length === 0 && (
+              <div className="p-4 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="flex items-start gap-2.5">
+                  <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-amber-600" />
+                  <div>
+                    <p className="font-semibold text-slate-900">Belum Ada Kelas yang Terdaftar</p>
+                    <p className="text-[11px] text-amber-800 mt-0.5 leading-relaxed">
+                      Asesmen diagnostik dan token pengerjaan wajib dikaitkan dengan satu kelas yang Anda ampu. Silakan tambahkan kelas terlebih dahulu sebelum membuat asesmen.
+                    </p>
+                  </div>
+                </div>
+                {onOpenAddClass && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onClose();
+                      onOpenAddClass();
+                    }}
+                    className="px-3.5 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs shrink-0 transition-all shadow-sm flex items-center gap-1.5"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>Tambah Kelas Sekarang</span>
+                  </button>
+                )}
               </div>
-            </div>
-            {onOpenAddClass && (
-              <button
-                type="button"
-                onClick={() => {
-                  onClose();
-                  onOpenAddClass();
-                }}
-                className="px-3.5 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs shrink-0 transition-all shadow-sm flex items-center gap-1.5"
-              >
-                <Plus className="w-3.5 h-3.5" />
-                <span>Tambah Kelas Sekarang</span>
-              </button>
             )}
-          </div>
-        )}
 
-        {errorMessage && (
-          <div className="mt-4 p-3 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-center gap-2">
-            <AlertCircle className="w-4 h-4 shrink-0 text-rose-600" />
-            <span>{errorMessage}</span>
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} className="mt-5 space-y-6">
+            {errorMessage && (
+              <div className="p-3 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 shrink-0 text-rose-600" />
+                <span>{errorMessage}</span>
+              </div>
+            )}
 
           {/* Section 1: Data Utama Asesmen */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -646,13 +648,15 @@ export const CreateAssessmentModal: React.FC<CreateAssessmentModalProps> = ({
             </div>
           </div>
 
-          {/* Action buttons */}
-          <div className="pt-4 border-t border-slate-100 flex flex-col-reverse sm:flex-row items-center justify-between gap-3">
+          </div>
+
+          {/* Action buttons (Pinned Footer) */}
+          <div className="p-3.5 sm:p-4 border-t border-slate-100 bg-slate-50/90 flex flex-col-reverse sm:flex-row items-center justify-between gap-3 shrink-0">
             <p className="text-[11px] text-slate-500">
               *Token kelas aktif dibuat otomatis dengan kuota {customMaxUses} siswa.
             </p>
 
-            <div className="flex items-center gap-3 w-full sm:w-auto">
+            <div className="flex items-center gap-2.5 w-full sm:w-auto justify-end">
               <button
                 type="button"
                 onClick={onClose}

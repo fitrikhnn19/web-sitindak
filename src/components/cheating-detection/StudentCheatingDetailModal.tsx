@@ -29,14 +29,14 @@ export const StudentCheatingDetailModal: React.FC<StudentCheatingDetailModalProp
   if (!isOpen || !student) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-slate-900/40 backdrop-blur-sm overflow-y-auto animate-in fade-in duration-200">
-      <div className="relative w-full max-w-3xl bg-white border border-slate-200 rounded-2xl p-5 sm:p-7 shadow-xl my-8 flex flex-col max-h-[92vh]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200">
+      <div className="relative w-full max-w-3xl max-h-[94vh] sm:max-h-[90vh] flex flex-col rounded-2xl bg-white border border-slate-200 shadow-xl overflow-hidden">
         
         {/* Header */}
-        <div className="flex items-start justify-between pb-4 border-b border-slate-200 shrink-0">
+        <div className="p-4 sm:p-5 border-b border-slate-200 bg-slate-50/80 flex items-start justify-between shrink-0">
           <div className="flex items-center gap-3">
             <div
-              className={`w-11 h-11 rounded-xl flex items-center justify-center ${
+              className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
                 student.hasCheating
                   ? "bg-amber-100 text-amber-700 border border-amber-300"
                   : "bg-emerald-50 text-emerald-700 border border-emerald-200"
@@ -51,7 +51,7 @@ export const StudentCheatingDetailModal: React.FC<StudentCheatingDetailModalProp
 
             <div>
               <div className="flex items-center gap-2 flex-wrap">
-                <h2 className="text-lg sm:text-xl font-bold text-slate-900">
+                <h2 className="text-base sm:text-lg font-bold text-slate-900">
                   Audit Integritas: {student.studentName}
                 </h2>
                 <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200">
@@ -75,8 +75,10 @@ export const StudentCheatingDetailModal: React.FC<StudentCheatingDetailModalProp
           </button>
         </div>
 
-        {/* Status Badge & Diagnostic Overview */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 my-4 shrink-0">
+        {/* Scrollable Body */}
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4">
+          {/* Status Badge & Diagnostic Overview */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {/* Status Integritas */}
           <div
             className={`p-3 rounded-xl border ${
@@ -183,7 +185,7 @@ export const StudentCheatingDetailModal: React.FC<StudentCheatingDetailModalProp
         )}
 
         {/* Timeline of Suspicious Events */}
-        <div className="flex-1 overflow-y-auto pr-1 space-y-3">
+        <div className="space-y-3">
           <div className="flex items-center justify-between pb-1">
             <h3 className="text-xs font-bold uppercase tracking-wider text-slate-700">
               Kronologi Aktivitas Mencurigakan ({student.events.length} Kejadian)
@@ -272,16 +274,17 @@ export const StudentCheatingDetailModal: React.FC<StudentCheatingDetailModalProp
             </div>
           )}
         </div>
+        </div>
 
         {/* Footer */}
-        <div className="pt-4 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500 shrink-0 mt-4">
+        <div className="p-3.5 sm:p-4 border-t border-slate-200 bg-slate-50/90 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500 shrink-0">
           <p className="text-[11px]">
             *Laporan forensik tercatat otomatis oleh modul pengawas SITINDAK.
           </p>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
             <button
               onClick={onClose}
-              className="px-4 py-2 rounded-lg bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 font-semibold transition-colors shadow-xs"
+              className="w-full sm:w-auto px-4 py-2 rounded-lg bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 font-semibold transition-colors shadow-xs"
             >
               Tutup
             </button>

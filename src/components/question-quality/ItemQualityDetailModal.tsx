@@ -169,7 +169,7 @@ export const ItemQualityDetailModal: React.FC<ItemQualityDetailModalProps> = ({
             </span>
           </div>
 
-          <div className="flex items-center gap-1 bg-slate-100 p-0.5 rounded-lg border border-slate-200">
+          <div className="flex items-center gap-1 bg-slate-100 p-0.5 rounded-lg border border-slate-200 overflow-x-auto scrollbar-none max-w-full shrink-0">
             <button
               onClick={() => setActiveTab("soal")}
               className={`px-3 py-1 rounded-md text-xs font-semibold transition-all ${

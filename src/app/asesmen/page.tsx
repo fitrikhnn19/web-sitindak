@@ -603,11 +603,11 @@ function AssessmentContent() {
 
               {/* Student info badge */}
               <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-blue-50 border border-blue-200 text-xs text-blue-900 font-semibold">
-                <User className="w-3.5 h-3.5 text-blue-600" />
-                <span className="max-w-[110px] sm:max-w-none truncate">
+                <User className="w-3.5 h-3.5 text-blue-600 shrink-0" />
+                <span className="max-w-[75px] sm:max-w-none truncate">
                   {studentName}
                 </span>
-                <span className="text-[10px] px-1.5 py-0.2 rounded bg-blue-100 text-blue-800 border border-blue-200">
+                <span className="text-[10px] px-1.5 py-0.2 rounded bg-blue-100 text-blue-800 border border-blue-200 hidden sm:inline">
                   {token.className}
                 </span>
               </div>
@@ -767,9 +767,15 @@ function AssessmentContent() {
                   </button>
 
                   {/* Center Question Counter Indicator */}
-                  <span className="text-xs text-slate-500 font-mono font-medium">
-                    Soal {currentIndex + 1} dari {examQuestions.length}
-                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setIsMobilePaletteOpen(true)}
+                    className="px-2.5 py-1.5 rounded-lg text-xs font-mono font-bold text-slate-700 hover:text-blue-700 hover:bg-blue-50 transition-colors flex items-center gap-1.5"
+                    title="Buka Kisi Navigasi Soal"
+                  >
+                    <span>Soal {currentIndex + 1} dari {examQuestions.length}</span>
+                    <Menu className="w-3.5 h-3.5 text-blue-600 lg:hidden" />
+                  </button>
 
                   {currentIndex < examQuestions.length - 1 ? (
                     <button
@@ -861,8 +867,8 @@ function AssessmentContent() {
 
       {/* Mobile Drawer Modal for Question Navigation Palette */}
       {isMobilePaletteOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm lg:hidden">
-          <div className="w-full max-w-sm rounded-2xl bg-white border border-slate-200 p-5 shadow-xl relative">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/40 backdrop-blur-sm lg:hidden animate-in fade-in duration-150">
+          <div className="w-full max-w-sm max-h-[92vh] overflow-y-auto rounded-2xl bg-white border border-slate-200 p-5 shadow-xl relative">
             <button
               type="button"
               onClick={() => setIsMobilePaletteOpen(false)}
