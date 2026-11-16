@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState, Suspense } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   Mail,
   Lock,
@@ -17,14 +17,17 @@ import {
 } from "lucide-react";
 import { TeacherAuthLayout } from "@/components/auth/TeacherAuthLayout";
 import { useTeacherAuth } from "@/lib/useTeacherAuth";
+import { createClient } from "@/lib/supabase/client";
 
 function LupaSandiContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { requestPasswordReset, resetPassword } = useTeacherAuth();
 
   // Wizard Step: 1 = Input Email, 2 = Input Sandi Baru, 3 = Selesai
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [email, setEmail] = useState("");
+  const [emailSent, setEmailSent] = useState(false);
   const [newPassword, setNewPassword] = useState("");
   const [confirmNewPassword, setConfirmNewPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -32,6 +35,33 @@ function LupaSandiContent() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Deteksi tautan verifikasi email dari Supabase
+  useEffect(() => {
+    if (searchParams.get("step") === "2") {
+      setStep(2);
+    }
+
+    try {
+      const supabase = createClient();
+      const {
+        data: { subscription },
+      } = supabase.auth.onAuthStateChange((event, session) => {
+        if (event === "PASSWORD_RECOVERY" || (session && searchParams.get("step") === "2")) {
+          if (session?.user?.email) {
+            setEmail(session.user.email);
+          }
+          setStep(2);
+        }
+      });
+
+      return () => {
+        subscription.unsubscribe();
+      };
+    } catch {
+      // Ignore
+    }
+  }, [searchParams]);
 
   // Step 1: Request Reset
   const handleRequestReset = async (e: React.FormEvent) => {
@@ -46,7 +76,7 @@ function LupaSandiContent() {
 
       if (res.success) {
         setSuccessMessage(res.message);
-        setStep(2);
+        setEmailSent(true);
       } else {
         setErrorMessage(res.message);
       }
@@ -125,56 +155,87 @@ function LupaSandiContent() {
 
       {/* STEP 1: Masukkan Email */}
       {step === 1 && (
-        <form onSubmit={handleRequestReset} method="POST" className="space-y-4">
-          <div>
-            <label htmlFor="email" className="block text-xs font-semibold text-slate-700 mb-1.5">
-              Alamat Email Terdaftar:
-            </label>
-            <div className="relative">
-              <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-3 pointer-events-none" />
-              <input
-                id="email"
-                name="email"
-                type="email"
-                autoComplete="username"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="sri.wahyuni@guru.sma.belajar.id"
-                className="w-full pl-9 pr-3.5 py-2.5 rounded-lg bg-white border border-slate-300 text-slate-900 text-xs sm:text-sm focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-100 transition-all placeholder:text-slate-400"
-                required
-              />
+        <div className="space-y-4">
+          {emailSent ? (
+            <div className="p-4 rounded-xl bg-blue-50 border border-blue-200 text-blue-900 space-y-3 text-xs">
+              <div className="flex items-center gap-2 font-bold text-sm text-blue-950">
+                <CheckCircle2 className="w-5 h-5 text-blue-600 shrink-0" />
+                <span>Tautan Verifikasi Telah Dikirim!</span>
+              </div>
+              <p className="leading-relaxed text-slate-700">
+                Tautan pemulihan kata sandi telah dikirim ke <strong className="text-blue-900">{email}</strong>. Silakan buka kotak masuk atau folder spam email Anda, lalu klik tautan tersebut untuk membuat kata sandi baru.
+              </p>
+              <div className="pt-2 flex flex-col sm:flex-row gap-2">
+                <button
+                  type="button"
+                  onClick={() => setStep(2)}
+                  className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs transition-colors flex items-center justify-center gap-1.5"
+                >
+                  <span>Lanjut Buat Sandi Baru</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setEmailSent(false)}
+                  className="px-3 py-2 rounded-lg bg-white border border-slate-300 text-slate-700 font-semibold text-xs hover:bg-slate-50 transition-colors"
+                >
+                  Ganti Email / Kirim Ulang
+                </button>
+              </div>
             </div>
-            <p className="text-[11px] text-slate-500 mt-1">
-              Kami akan memeriksa akun guru yang sesuai dengan alamat email Anda.
-            </p>
-          </div>
+          ) : (
+            <form onSubmit={handleRequestReset} method="POST" className="space-y-4">
+              <div>
+                <label htmlFor="email" className="block text-xs font-semibold text-slate-700 mb-1.5">
+                  Alamat Email Terdaftar:
+                </label>
+                <div className="relative">
+                  <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-3 pointer-events-none" />
+                  <input
+                    id="email"
+                    name="email"
+                    type="email"
+                    autoComplete="username"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="sri.wahyuni@guru.sma.belajar.id"
+                    className="w-full pl-9 pr-3.5 py-2.5 rounded-lg bg-white border border-slate-300 text-slate-900 text-xs sm:text-sm focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-100 transition-all placeholder:text-slate-400"
+                    required
+                  />
+                </div>
+                <p className="text-[11px] text-slate-500 mt-1">
+                  Kami akan mengirimkan tautan verifikasi pemulihan akun ke alamat email Anda.
+                </p>
+              </div>
 
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="w-full py-2.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs sm:text-sm shadow-sm transition-all flex items-center justify-center gap-2 disabled:opacity-60"
-          >
-            {isSubmitting ? (
-              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-            ) : (
-              <>
-                <span>Lanjut: Verifikasi Akun</span>
-                <ArrowRight className="w-4 h-4" />
-              </>
-            )}
-          </button>
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="w-full py-2.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs sm:text-sm shadow-sm transition-all flex items-center justify-center gap-2 disabled:opacity-60 cursor-pointer"
+              >
+                {isSubmitting ? (
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <>
+                    <span>Kirim Tautan Verifikasi Email</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </>
+                )}
+              </button>
 
-          <div className="pt-2 text-center">
-            <button
-              type="button"
-              onClick={() => setEmail("sri.wahyuni@guru.sma.belajar.id")}
-              className="text-[11px] text-blue-600 hover:text-blue-700 font-medium inline-flex items-center gap-1.5"
-            >
-              <ShieldCheck className="w-3.5 h-3.5 text-blue-600" />
-              <span>Gunakan Email Akun Uji Coba (Dra. Sri Wahyuni)</span>
-            </button>
-          </div>
-        </form>
+              <div className="pt-2 text-center">
+                <button
+                  type="button"
+                  onClick={() => setEmail("sri.wahyuni@guru.sma.belajar.id")}
+                  className="text-[11px] text-blue-600 hover:text-blue-700 font-medium inline-flex items-center gap-1.5"
+                >
+                  <ShieldCheck className="w-3.5 h-3.5 text-blue-600" />
+                  <span>Gunakan Email Akun Uji Coba (Dra. Sri Wahyuni)</span>
+                </button>
+              </div>
+            </form>
+          )}
+        </div>
       )}
 
       {/* STEP 2: Masukkan Kata Sandi Baru */}
