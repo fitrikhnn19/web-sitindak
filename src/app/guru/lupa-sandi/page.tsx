@@ -125,15 +125,18 @@ function LupaSandiContent() {
 
       {/* STEP 1: Masukkan Email */}
       {step === 1 && (
-        <form onSubmit={handleRequestReset} className="space-y-4">
+        <form onSubmit={handleRequestReset} method="POST" className="space-y-4">
           <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+            <label htmlFor="email" className="block text-xs font-semibold text-slate-700 mb-1.5">
               Alamat Email Terdaftar:
             </label>
             <div className="relative">
               <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-3 pointer-events-none" />
               <input
+                id="email"
+                name="email"
                 type="email"
+                autoComplete="username"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="sri.wahyuni@guru.sma.belajar.id"
@@ -176,20 +179,23 @@ function LupaSandiContent() {
 
       {/* STEP 2: Masukkan Kata Sandi Baru */}
       {step === 2 && (
-        <form onSubmit={handleSaveNewPassword} className="space-y-4">
+        <form onSubmit={handleSaveNewPassword} method="POST" className="space-y-4">
           <div className="p-3 rounded-lg bg-slate-50 border border-slate-200 text-xs text-slate-700">
             <span>Email terverifikasi: </span>
             <strong className="text-blue-600 font-mono font-semibold">{email}</strong>
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+            <label htmlFor="newPassword" className="block text-xs font-semibold text-slate-700 mb-1.5">
               Kata Sandi Baru:
             </label>
             <div className="relative">
               <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-3 pointer-events-none" />
               <input
+                id="newPassword"
+                name="newPassword"
                 type={showPassword ? "text" : "password"}
+                autoComplete="new-password"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
                 placeholder="Minimal 6 karakter"
@@ -209,13 +215,16 @@ function LupaSandiContent() {
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+            <label htmlFor="confirmNewPassword" className="block text-xs font-semibold text-slate-700 mb-1.5">
               Konfirmasi Kata Sandi Baru:
             </label>
             <div className="relative">
               <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-3 pointer-events-none" />
               <input
+                id="confirmNewPassword"
+                name="confirmNewPassword"
                 type={showPassword ? "text" : "password"}
+                autoComplete="new-password"
                 value={confirmNewPassword}
                 onChange={(e) => setConfirmNewPassword(e.target.value)}
                 placeholder="Ulangi kata sandi baru"

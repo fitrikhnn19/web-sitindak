@@ -118,17 +118,20 @@ function DaftarFormContent() {
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} method="POST" className="space-y-4">
         
         {/* Kolom 1: Nama Lengkap Guru */}
         <div>
-          <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+          <label htmlFor="name" className="block text-xs font-semibold text-slate-700 mb-1.5">
             Nama Lengkap Guru (beserta Gelar):
           </label>
           <div className="relative">
             <User className="w-4 h-4 text-slate-400 absolute left-3 top-3 pointer-events-none" />
             <input
+              id="name"
+              name="name"
               type="text"
+              autoComplete="name"
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Contoh: Budi Santoso, S.Pd., M.Si."
@@ -143,13 +146,16 @@ function DaftarFormContent() {
 
         {/* Kolom 2: Email */}
         <div>
-          <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+          <label htmlFor="email" className="block text-xs font-semibold text-slate-700 mb-1.5">
             Alamat Email Aktif:
           </label>
           <div className="relative">
             <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-3 pointer-events-none" />
             <input
+              id="email"
+              name="email"
               type="email"
+              autoComplete="username"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="budi.santoso@guru.sma.belajar.id"
@@ -164,13 +170,16 @@ function DaftarFormContent() {
 
         {/* Kolom 3: Kata Sandi */}
         <div>
-          <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+          <label htmlFor="password" className="block text-xs font-semibold text-slate-700 mb-1.5">
             Kata Sandi Baru:
           </label>
           <div className="relative">
             <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-3 pointer-events-none" />
             <input
+              id="password"
+              name="password"
               type={showPassword ? "text" : "password"}
+              autoComplete="new-password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Minimal 6 karakter"
@@ -206,13 +215,16 @@ function DaftarFormContent() {
 
         {/* Kolom 4: Konfirmasi Kata Sandi */}
         <div>
-          <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+          <label htmlFor="confirmPassword" className="block text-xs font-semibold text-slate-700 mb-1.5">
             Konfirmasi Kata Sandi:
           </label>
           <div className="relative">
             <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-3 pointer-events-none" />
             <input
+              id="confirmPassword"
+              name="confirmPassword"
               type={showPassword ? "text" : "password"}
+              autoComplete="new-password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               placeholder="Ulangi kata sandi di atas"

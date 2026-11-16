@@ -111,17 +111,20 @@ function MasukFormContent() {
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} method="POST" className="space-y-4">
         
         {/* Kolom Email */}
         <div>
-          <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+          <label htmlFor="email" className="block text-xs font-semibold text-slate-700 mb-1.5">
             Alamat Email Guru:
           </label>
           <div className="relative">
             <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-3 pointer-events-none" />
             <input
+              id="email"
+              name="email"
               type="email"
+              autoComplete="username"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="sri.wahyuni@guru.sma.belajar.id"
@@ -137,7 +140,7 @@ function MasukFormContent() {
         {/* Kolom Kata Sandi */}
         <div>
           <div className="flex items-center justify-between mb-1.5">
-            <label className="block text-xs font-semibold text-slate-700">
+            <label htmlFor="password" className="block text-xs font-semibold text-slate-700">
               Kata Sandi:
             </label>
             <Link
@@ -150,7 +153,10 @@ function MasukFormContent() {
           <div className="relative">
             <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-3 pointer-events-none" />
             <input
+              id="password"
+              name="password"
               type={showPassword ? "text" : "password"}
+              autoComplete="current-password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••••••"
