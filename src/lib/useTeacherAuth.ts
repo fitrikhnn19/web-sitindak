@@ -7,6 +7,7 @@ import {
   TeacherProfile,
   getCurrentTeacherSession,
   loginTeacher,
+  loginWithGoogle,
   registerTeacher,
   logoutTeacher,
   updateTeacherProfile,
@@ -113,11 +114,19 @@ export function useTeacherAuth() {
     return res;
   };
 
+  const handleLoginWithGoogle = async (): Promise<{ success: boolean; message: string }> => {
+    setIsLoading(true);
+    const res = await loginWithGoogle();
+    setIsLoading(false);
+    return res;
+  };
+
   return {
     teacher,
     isLoggedIn: !!teacher,
     isLoading,
     login: handleLogin,
+    loginWithGoogle: handleLoginWithGoogle,
     register: handleRegister,
     logout: handleLogout,
     updateProfile: handleUpdateProfile,
