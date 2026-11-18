@@ -64,16 +64,18 @@ export interface AssessmentItem {
 }
 
 export const MOCK_QUESTION_ID_MAP: Record<string, string> = {
-  "q-1": "2598e45a-da9f-447f-b732-ec1e26e1d069",
-  "q-2": "a3acab1e-5a8e-462c-803c-12d766437e06",
-  "q-3": "518e8d84-b30f-4996-aa7d-2f208ea7fa44",
-  "q-4": "6461ffe2-e1c1-42c2-95de-cbdf5876ad3c",
-  "q-5": "170fc829-11d4-4f63-a112-66c36bd1f226",
-  "q-6": "2cb2f6f1-7044-42c6-acc0-8f413f2d939d",
-  "q-7": "e43c7106-6683-4ef1-addc-75b3645a5871",
-  "q-8": "496834d7-0c28-4339-adad-9ff52a6ba276",
-  "q-9": "d0cb4f35-f1b8-49a3-9e12-664c90daf414",
-  "q-10": "93022887-f37a-4d4b-a928-87ddc703f077",
+  "q-1": "21d06bde-21d0-411a-ab29-a1e59261e14f",
+  "q-2": "6b86fcbc-ea70-4375-9eff-1bf93ecbe45a",
+  "q-3": "2905e53e-b1b2-4421-8200-2e2f2306566b",
+  "q-4": "bb956a77-aa04-4d42-bf7c-b974e7b7efb9",
+  "q-5": "ce47950d-4c50-47e5-831d-cebe9ca006e9",
+  "q-6": "d4acb8e2-f5fe-48f3-9942-bc4abf2d866f",
+  "q-7": "4a8efca9-89ad-4fd3-bf7c-e977c5c01e11",
+  "q-8": "96796c04-9e8c-4b46-a0ef-c920aa5fa3ad",
+  "q-9": "c989963d-f4d9-42cc-ab69-1a2d10e3dff8",
+  "q-10": "0c13e0ab-c103-4b48-8504-d9472c840f1d",
+  "q-11": "dd56e9c5-20ce-42b5-a4b3-d9c2b693d2b2",
+  "q-12": "563d22b0-ea5f-440b-8f0a-c3ae60bbe993",
 };
 
 export function resolveQuestionUuid(id: string): string {
@@ -154,8 +156,45 @@ export function generateMockStudents(
   return students;
 }
 
-// Initial data asesmen (kosong untuk instansiasi live baru)
-const INITIAL_ASSESSMENTS: AssessmentItem[] = [];
+// Initial data asesmen default
+const INITIAL_ASSESSMENTS: AssessmentItem[] = [
+  {
+    id: "aaeed915-9e8a-4f69-a041-e360b00cc9a0",
+    title: "Asesmen Diagnostik Transformasi Geometri (3-Tier)",
+    classId: "2080c81f-b6b0-42aa-a6c9-5f0f706228d1",
+    className: "XI 10",
+    gradeLevel: "SMA Kelas 11",
+    teacherName: "Nur Fitria Khanani",
+    questionIds: [
+      "21d06bde-21d0-411a-ab29-a1e59261e14f",
+      "6b86fcbc-ea70-4375-9eff-1bf93ecbe45a",
+      "2905e53e-b1b2-4421-8200-2e2f2306566b",
+      "bb956a77-aa04-4d42-bf7c-b974e7b7efb9",
+      "ce47950d-4c50-47e5-831d-cebe9ca006e9",
+      "d4acb8e2-f5fe-48f3-9942-bc4abf2d866f",
+      "4a8efca9-89ad-4fd3-bf7c-e977c5c01e11",
+      "96796c04-9e8c-4b46-a0ef-c920aa5fa3ad",
+      "c989963d-f4d9-42cc-ab69-1a2d10e3dff8",
+      "0c13e0ab-c103-4b48-8504-d9472c840f1d",
+      "dd56e9c5-20ce-42b5-a4b3-d9c2b693d2b2",
+      "563d22b0-ea5f-440b-8f0a-c3ae60bbe993",
+    ],
+    opensAt: "2026-11-18T00:00:00+08:00",
+    closesAt: "2026-11-25T23:59:59+08:00",
+    durationMinutes: 60,
+    status: "berjalan",
+    createdAt: "2026-11-18T00:00:00+08:00",
+    token: {
+      id: "tok-geoxi10",
+      code: "GEOXI10",
+      isActive: true,
+      maxUses: 35,
+      usedCount: 0,
+      expiresAt: "2026-11-25T23:59:59+08:00",
+    },
+    students: [],
+  },
+];
 
 const STORAGE_KEY = "sitindak_teacher_assessments_v1";
 

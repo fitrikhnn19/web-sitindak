@@ -21,8 +21,18 @@ export interface ClassRoom {
   createdAt?: string; // ISO datetime
 }
 
-// Data awal kelas guru (kosong untuk instansiasi live baru)
-export const DEFAULT_CLASSES: ClassRoom[] = [];
+// Data awal kelas guru default
+export const DEFAULT_CLASSES: ClassRoom[] = [
+  {
+    id: "2080c81f-b6b0-42aa-a6c9-5f0f706228d1",
+    name: "XI 10",
+    gradeLevel: "SMA Kelas 11",
+    totalStudents: 35,
+    teacherName: "Nur Fitria Khanani",
+    academicYear: "2026/2027",
+    description: "Matematika Tingkat Lanjut - Transformasi Geometri",
+  },
+];
 
 const CLASSES_STORAGE_KEY = "sitindak_teacher_classes_v1";
 
@@ -51,7 +61,7 @@ export function getAllClasses(): ClassRoom[] {
   try {
     const raw = localStorage.getItem(CLASSES_STORAGE_KEY);
     if (!raw) {
-      return [];
+      return DEFAULT_CLASSES.map(normalizeClass);
     }
     const parsed = JSON.parse(raw);
     if (Array.isArray(parsed)) {
