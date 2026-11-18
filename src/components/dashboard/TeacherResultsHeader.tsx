@@ -364,7 +364,19 @@ export const TeacherResultsHeader: React.FC<TeacherResultsHeaderProps> = ({
               </span>
               <span className="flex items-center gap-1.5">
                 <Calendar className="w-3.5 h-3.5 text-slate-400" />
-                <span>Jadwal: 1 Nov – 10 Nov 2026</span>
+                <span>
+                  Jadwal:{" "}
+                  {summary.opensAt && summary.closesAt
+                    ? `${new Date(summary.opensAt).toLocaleDateString("id-ID", {
+                        day: "numeric",
+                        month: "short",
+                      })} – ${new Date(summary.closesAt).toLocaleDateString("id-ID", {
+                        day: "numeric",
+                        month: "short",
+                        year: "numeric",
+                      })}`
+                    : "18 Nov – 25 Nov 2026"}
+                </span>
               </span>
             </div>
           </div>

@@ -2,6 +2,7 @@
 // Data tiruan & service diagnostik lengkap untuk Profil Pemahaman Siswa (Fase 2 SITINDAK)
 
 import { createClient } from "./supabase/client";
+import { resolveQuestionUuid } from "./assessment-management-store";
 import {
   MOCK_QUESTIONS,
   ThreeTierQuestion,
@@ -535,7 +536,9 @@ export async function fetchAssessmentSummaryFromSupabase(
       const answersMap: Record<string, any> = {};
       if (Array.isArray(sub.student_answers)) {
         sub.student_answers.forEach((sa: any) => {
-          answersMap[sa.question_id] = sa;
+          if (sa.question_id) {
+            answersMap[sa.question_id] = sa;
+          }
         });
       }
 
@@ -544,24 +547,25 @@ export async function fetchAssessmentSummaryFromSupabase(
       const reviewTopicsSet = new Set<string>();
 
       const itemResults: StudentItemResult[] = activeQuestions.map((q) => {
-        const sa = answersMap[q.id];
+        const sa = answersMap[q.id] || answersMap[resolveQuestionUuid(q.id)];
+        const t1CorrectKey = q.tier1Options.find((o) => o.isCorrect)?.key || "A";
+        const t2CorrectKey = q.tier2Options.find((o) => o.isCorrect)?.key || "A";
+
         const t1Ans = (sa?.tier1_answer || "A") as "A" | "B" | "C" | "D" | "E";
         const t2Ans = (sa?.tier2_reason || "A") as "A" | "B" | "C" | "D" | "E";
         const t3Conf = (sa?.tier3_confidence || "tidak yakin") as "yakin" | "tidak yakin";
 
-        const t1CorrectKey = q.tier1Options.find((o) => o.isCorrect)?.key || "A";
-        const t2CorrectKey = q.tier2Options.find((o) => o.isCorrect)?.key || "A";
-
-        const isT1 = sa?.is_t1_correct ?? (t1Ans === t1CorrectKey);
-        const isT2 = sa?.is_t2_correct ?? (t2Ans === t2CorrectKey);
+        const isT1 = sa ? (sa.is_t1_correct ?? (t1Ans === t1CorrectKey)) : false;
+        const isT2 = sa ? (sa.is_t2_correct ?? (t2Ans === t2CorrectKey)) : false;
 
         if (isT1) tier1Correct++;
         if (isT2) tier2Correct++;
 
         let status: ConceptionStatus = "belum paham";
         if (sa?.conception_status) {
-          status = sa.conception_status as ConceptionStatus;
-        } else {
+          const raw = String(sa.conception_status).replace("_", " ").toLowerCase();
+          status = raw === "paham" || raw === "miskonsepsi" ? (raw as ConceptionStatus) : "belum paham";
+        } else if (sa) {
           status = evaluateConception(q, {
             questionId: q.id,
             tier1Answer: t1Ans,

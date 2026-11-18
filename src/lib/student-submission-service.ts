@@ -320,18 +320,21 @@ export async function submitStudentAssessmentToSupabase(
 
       const answersToInsert = evaluatedAnswers.map((ea) => ({
         submission_id: submissionId,
-        question_id: ea.questionUuid,
+        question_id: ea.questionUuid || resolveQuestionUuid(ea.rawQuestionId) || ea.rawQuestionId,
         tier1_answer: ea.tier1Answer,
         tier2_reason: ea.tier2Reason,
         tier3_confidence: ea.tier3Confidence,
         is_t1_correct: ea.isT1Correct,
         is_t2_correct: ea.isT2Correct,
-        conception_status: ea.conceptionStatus,
+        conception_status:
+          ea.conceptionStatus === "belum paham"
+            ? "belum_paham"
+            : ea.conceptionStatus,
       }));
 
       const { error: ansErr } = await supabase.from("student_answers").insert(answersToInsert);
       if (ansErr) {
-        console.warn("Gagal insert ke student_answers:", ansErr);
+        console.error("Gagal insert ke student_answers:", ansErr);
       }
     }
 
