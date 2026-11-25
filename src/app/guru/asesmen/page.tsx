@@ -74,15 +74,11 @@ function AssessmentManagementContent() {
 
     // Ambil data terbaru dari Supabase
     fetchAssessmentsFromSupabase().then((remoteAssessments) => {
-      if (remoteAssessments && remoteAssessments.length > 0) {
-        setAssessments(remoteAssessments);
-      }
+      setAssessments(remoteAssessments);
     });
 
     fetchClassesFromSupabase().then((remoteClasses) => {
-      if (remoteClasses && remoteClasses.length > 0) {
-        setClasses(remoteClasses);
-      }
+      setClasses(remoteClasses);
     });
 
     // Check if query params ask to open create modal or monitor specific token

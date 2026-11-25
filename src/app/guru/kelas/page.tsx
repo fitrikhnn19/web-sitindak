@@ -87,7 +87,7 @@ function ClassManagementDashboardContent() {
       if (!isMounted) return;
       setClasses(remote);
 
-      const loadedClasses = remote.length > 0 ? remote : initial;
+      const loadedClasses = remote;
 
       if (loadedClasses.length === 0) {
         setViewMode("overview");

@@ -21,20 +21,15 @@ export interface ClassRoom {
   createdAt?: string; // ISO datetime
 }
 
-// Data awal kelas guru default
-export const DEFAULT_CLASSES: ClassRoom[] = [
-  {
-    id: "2080c81f-b6b0-42aa-a6c9-5f0f706228d1",
-    name: "XI 10",
-    gradeLevel: "SMA Kelas 11",
-    totalStudents: 35,
-    teacherName: "Nur Fitria Khanani",
-    academicYear: "2026/2027",
-    description: "Matematika Tingkat Lanjut - Transformasi Geometri",
-  },
-];
+// Data awal kelas guru default (kosong untuk akun guru baru)
+export const DEFAULT_CLASSES: ClassRoom[] = [];
 
-const CLASSES_STORAGE_KEY = "sitindak_teacher_classes_v1";
+function getClassesStorageKey(teacherId?: string): string {
+  if (teacherId) return `sitindak_teacher_classes_${teacherId}`;
+  const current = getCurrentTeacherSession();
+  if (current?.id) return `sitindak_teacher_classes_${current.id}`;
+  return "sitindak_teacher_classes_guest";
+}
 
 function isBrowser(): boolean {
   return typeof window !== "undefined";
@@ -51,17 +46,41 @@ function normalizeClass(c: ClassRoom): ClassRoom {
 }
 
 /**
- * Mengambil seluruh daftar kelas guru dari localStorage (cache cepat untuk SSR & initial render)
+ * Mengambil seluruh daftar kelas guru dari localStorage (scoped per guru)
  */
-export function getAllClasses(): ClassRoom[] {
+export function getAllClasses(teacherId?: string): ClassRoom[] {
   if (!isBrowser()) {
     return [];
   }
 
   try {
-    const raw = localStorage.getItem(CLASSES_STORAGE_KEY);
+    const key = getClassesStorageKey(teacherId);
+    let raw = localStorage.getItem(key);
+
+    // Fallback migrasi jika key per-user belum terbentuk tetapi session aktif milik guru sebelumnya
+    if (!raw && !teacherId) {
+      const current = getCurrentTeacherSession();
+      if (current?.id) {
+        // Cek apakah ada data legacy di key lama
+        const legacy = localStorage.getItem("sitindak_teacher_classes_v1");
+        if (legacy) {
+          try {
+            const parsedLegacy = JSON.parse(legacy);
+            if (Array.isArray(parsedLegacy) && parsedLegacy.length > 0) {
+              // Hanya gunakan legacy jika cocok dengan nama guru
+              const filtered = parsedLegacy.filter((c: any) => c.teacherName === current.name);
+              if (filtered.length > 0) {
+                raw = JSON.stringify(filtered);
+                localStorage.setItem(key, raw);
+              }
+            }
+          } catch {}
+        }
+      }
+    }
+
     if (!raw) {
-      return DEFAULT_CLASSES.map(normalizeClass);
+      return [];
     }
     const parsed = JSON.parse(raw);
     if (Array.isArray(parsed)) {
@@ -77,10 +96,11 @@ export function getAllClasses(): ClassRoom[] {
 /**
  * Menyimpan daftar kelas ke cache lokal dan trigger event
  */
-export function saveClasses(classes: ClassRoom[]): void {
+export function saveClasses(classes: ClassRoom[], teacherId?: string): void {
   if (!isBrowser()) return;
   try {
-    localStorage.setItem(CLASSES_STORAGE_KEY, JSON.stringify(classes));
+    const key = getClassesStorageKey(teacherId);
+    localStorage.setItem(key, JSON.stringify(classes));
     window.dispatchEvent(new Event("sitindak_classes_change"));
   } catch (err) {
     console.error("Gagal menyimpan kelas ke localStorage:", err);
@@ -88,24 +108,31 @@ export function saveClasses(classes: ClassRoom[]): void {
 }
 
 /**
- * Memuat seluruh kelas guru langsung dari tabel `classes` di Supabase
+ * Memuat seluruh kelas guru langsung dari tabel `classes` di Supabase (difilter per teacher_id)
  */
-export async function fetchClassesFromSupabase(): Promise<ClassRoom[]> {
+export async function fetchClassesFromSupabase(explicitTeacherId?: string): Promise<ClassRoom[]> {
   if (!isBrowser()) return [];
 
   try {
     const supabase = createClient();
     const currentTeacher = getCurrentTeacherSession();
+    const { data: authData } = await supabase.auth.getUser();
+    const teacherId = explicitTeacherId || authData?.user?.id || currentTeacher?.id;
     const teacherName = currentTeacher?.name || "Guru";
+
+    if (!teacherId) {
+      return getAllClasses();
+    }
 
     const { data, error } = await supabase
       .from("classes")
       .select("*")
+      .eq("teacher_id", teacherId)
       .order("created_at", { ascending: true });
 
     if (error) {
       console.warn("Gagal mengambil data kelas dari Supabase, menggunakan cache:", error);
-      return getAllClasses();
+      return getAllClasses(teacherId);
     }
 
     if (data && Array.isArray(data)) {
@@ -120,11 +147,12 @@ export async function fetchClassesFromSupabase(): Promise<ClassRoom[]> {
         createdAt: row.created_at,
       }));
 
-      saveClasses(mapped);
+      saveClasses(mapped, teacherId);
       return mapped;
     }
 
-    return getAllClasses();
+    saveClasses([], teacherId);
+    return [];
   } catch (err) {
     console.error("Kesalahan jaringan fetch kelas Supabase:", err);
     return getAllClasses();

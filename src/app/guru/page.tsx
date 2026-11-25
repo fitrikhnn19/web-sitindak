@@ -23,10 +23,12 @@ import {
 } from "lucide-react";
 import { TeacherSessionHeader } from "@/components/dashboard/TeacherSessionHeader";
 import { useTeacherAuth } from "@/lib/useTeacherAuth";
+import { ClassRoom, fetchClassesFromSupabase, getAllClasses } from "@/lib/class-management-store";
 
 function TeacherDashboardHomeContent() {
   const router = useRouter();
   const { teacher, isLoggedIn, isLoading } = useTeacherAuth();
+  const [classes, setClasses] = React.useState<ClassRoom[]>(() => getAllClasses());
 
   useEffect(() => {
     if (!isLoading && !isLoggedIn) {
@@ -34,8 +36,20 @@ function TeacherDashboardHomeContent() {
     }
   }, [isLoading, isLoggedIn, router]);
 
+  useEffect(() => {
+    if (isLoggedIn && teacher?.id) {
+      fetchClassesFromSupabase(teacher.id).then((cls) => {
+        setClasses(cls);
+      });
+    }
+  }, [isLoggedIn, teacher?.id]);
+
   const greetingName = teacher?.name || "Bapak/Ibu Guru";
   const schoolDisplay = teacher?.schoolName || "Sekolah Belum Diatur";
+  const classDisplay =
+    classes.length > 0
+      ? `Kelas Diampu: ${classes.map((c) => c.name).join(", ")}`
+      : "Belum ada kelas yang didaftarkan";
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col font-sans">
@@ -72,7 +86,7 @@ function TeacherDashboardHomeContent() {
                 </span>
                 <span className="flex items-center gap-1.5">
                   <Users className="w-4 h-4 text-slate-400" />
-                  <span>Kelas Diampu: XI-A, XI-B (SMA Kelas 11)</span>
+                  <span>{classDisplay}</span>
                 </span>
                 <span className="inline-flex items-center gap-1 text-emerald-700 font-semibold bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />

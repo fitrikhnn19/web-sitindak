@@ -156,47 +156,15 @@ export function generateMockStudents(
   return students;
 }
 
-// Initial data asesmen default
-const INITIAL_ASSESSMENTS: AssessmentItem[] = [
-  {
-    id: "aaeed915-9e8a-4f69-a041-e360b00cc9a0",
-    title: "Asesmen Diagnostik Transformasi Geometri (3-Tier)",
-    classId: "2080c81f-b6b0-42aa-a6c9-5f0f706228d1",
-    className: "XI 10",
-    gradeLevel: "SMA Kelas 11",
-    teacherName: "Nur Fitria Khanani",
-    questionIds: [
-      "21d06bde-21d0-411a-ab29-a1e59261e14f",
-      "6b86fcbc-ea70-4375-9eff-1bf93ecbe45a",
-      "2905e53e-b1b2-4421-8200-2e2f2306566b",
-      "bb956a77-aa04-4d42-bf7c-b974e7b7efb9",
-      "ce47950d-4c50-47e5-831d-cebe9ca006e9",
-      "d4acb8e2-f5fe-48f3-9942-bc4abf2d866f",
-      "4a8efca9-89ad-4fd3-bf7c-e977c5c01e11",
-      "96796c04-9e8c-4b46-a0ef-c920aa5fa3ad",
-      "c989963d-f4d9-42cc-ab69-1a2d10e3dff8",
-      "0c13e0ab-c103-4b48-8504-d9472c840f1d",
-      "dd56e9c5-20ce-42b5-a4b3-d9c2b693d2b2",
-      "563d22b0-ea5f-440b-8f0a-c3ae60bbe993",
-    ],
-    opensAt: "2026-11-18T00:00:00+08:00",
-    closesAt: "2026-11-25T23:59:59+08:00",
-    durationMinutes: 60,
-    status: "berjalan",
-    createdAt: "2026-11-18T00:00:00+08:00",
-    token: {
-      id: "tok-geoxi10",
-      code: "GEOXI10",
-      isActive: true,
-      maxUses: 35,
-      usedCount: 0,
-      expiresAt: "2026-11-25T23:59:59+08:00",
-    },
-    students: [],
-  },
-];
+// Initial data asesmen default (kosong untuk guru baru)
+export const INITIAL_ASSESSMENTS: AssessmentItem[] = [];
 
-const STORAGE_KEY = "sitindak_teacher_assessments_v1";
+function getAssessmentsStorageKey(teacherId?: string): string {
+  if (teacherId) return `sitindak_teacher_assessments_${teacherId}`;
+  const current = getCurrentTeacherSession();
+  if (current?.id) return `sitindak_teacher_assessments_${current.id}`;
+  return "sitindak_teacher_assessments_guest";
+}
 
 // Evaluasi status jadwal turunan
 export function deriveScheduleStatus(
@@ -272,14 +240,36 @@ function normalizeAssessment(item: AssessmentItem): AssessmentItem {
   };
 }
 
-// Baca semua asesmen dari storage (cepat & aman untuk SSR)
-export function getAllAssessments(): AssessmentItem[] {
+// Baca semua asesmen dari storage (scoped per guru)
+export function getAllAssessments(teacherId?: string): AssessmentItem[] {
   if (typeof window === "undefined") {
     return [];
   }
 
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const key = getAssessmentsStorageKey(teacherId);
+    let raw = localStorage.getItem(key);
+
+    // Fallback migrasi jika key per-user belum terbentuk tapi session aktif milik guru sebelumnya
+    if (!raw && !teacherId) {
+      const current = getCurrentTeacherSession();
+      if (current?.id) {
+        const legacy = localStorage.getItem("sitindak_teacher_assessments_v1");
+        if (legacy) {
+          try {
+            const parsedLegacy = JSON.parse(legacy);
+            if (Array.isArray(parsedLegacy) && parsedLegacy.length > 0) {
+              const filtered = parsedLegacy.filter((a: any) => a.teacherName === current.name);
+              if (filtered.length > 0) {
+                raw = JSON.stringify(filtered);
+                localStorage.setItem(key, raw);
+              }
+            }
+          } catch {}
+        }
+      }
+    }
+
     if (!raw) {
       return [];
     }
@@ -295,10 +285,11 @@ export function getAllAssessments(): AssessmentItem[] {
 }
 
 // Simpan data asesmen ke storage & broadcast event
-export function saveAssessments(assessments: AssessmentItem[]): void {
+export function saveAssessments(assessments: AssessmentItem[], teacherId?: string): void {
   if (typeof window === "undefined") return;
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(assessments));
+    const key = getAssessmentsStorageKey(teacherId);
+    localStorage.setItem(key, JSON.stringify(assessments));
     window.dispatchEvent(new Event("sitindak_assessments_change"));
   } catch (err) {
     console.error("Gagal menyimpan ke localStorage asesmen:", err);
@@ -306,19 +297,28 @@ export function saveAssessments(assessments: AssessmentItem[]): void {
 }
 
 /**
- * Memuat asesmen langsung dari Supabase tabel `assessments`, `classes`, dan `assessment_questions`
+ * Memuat asesmen langsung dari Supabase (difilter berdasarkan teacher_id)
  */
-export async function fetchAssessmentsFromSupabase(): Promise<AssessmentItem[]> {
+export async function fetchAssessmentsFromSupabase(explicitTeacherId?: string): Promise<AssessmentItem[]> {
   if (typeof window === "undefined") return getAllAssessments();
 
   try {
     const supabase = createClient();
+    const currentTeacher = getCurrentTeacherSession();
+    const { data: authData } = await supabase.auth.getUser();
+    const teacherId = explicitTeacherId || authData?.user?.id || currentTeacher?.id;
+
+    if (!teacherId) {
+      return getAllAssessments();
+    }
+
     const { data, error } = await supabase
       .from("assessments")
       .select(`
         id,
         title,
         class_id,
+        teacher_id,
         opens_at,
         closes_at,
         duration_minutes,
@@ -342,15 +342,16 @@ export async function fetchAssessmentsFromSupabase(): Promise<AssessmentItem[]> 
           order_index
         )
       `)
+      .eq("teacher_id", teacherId)
       .order("created_at", { ascending: false });
 
     if (error) {
       console.warn("Gagal mengambil asesmen dari Supabase:", error);
-      return getAllAssessments();
+      return getAllAssessments(teacherId);
     }
 
     if (data && Array.isArray(data)) {
-      const currentCached = getAllAssessments();
+      const currentCached = getAllAssessments(teacherId);
       const mapped: AssessmentItem[] = data.map((row: any) => {
         const matchingCached = currentCached.find(
           (c) => c.id === row.id || c.token.code === row.token_code
@@ -364,17 +365,15 @@ export async function fetchAssessmentsFromSupabase(): Promise<AssessmentItem[]> 
           : [];
 
         const cls = row.classes;
-        const className = cls?.name || "Kelas XI";
+        const className = cls?.name || "Kelas";
         const gradeLevel = cls?.grade_level || "SMA Kelas 11";
         const teacherName =
           row.profiles?.full_name ||
-          getCurrentTeacherSession()?.name ||
+          currentTeacher?.name ||
           "Guru";
 
         const maxUses = row.max_uses ?? 32;
         const usedCount = row.used_count ?? 0;
-        const completedCount = Math.floor(usedCount * 0.8);
-        const inProgressCount = usedCount - completedCount;
 
         const students =
           matchingCached?.students && matchingCached.students.length > 0
@@ -414,11 +413,12 @@ export async function fetchAssessmentsFromSupabase(): Promise<AssessmentItem[]> 
         };
       });
 
-      saveAssessments(mapped);
+      saveAssessments(mapped, teacherId);
       return mapped;
     }
 
-    return getAllAssessments();
+    saveAssessments([], teacherId);
+    return [];
   } catch (err) {
     console.error("Kesalahan fetch asesmen Supabase:", err);
     return getAllAssessments();

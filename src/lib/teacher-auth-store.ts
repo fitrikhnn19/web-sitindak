@@ -325,6 +325,12 @@ export async function logoutTeacher(): Promise<void> {
     console.error("Gagal keluar dari Supabase:", e);
   } finally {
     setTeacherSession(null);
+    if (isBrowser()) {
+      try {
+        localStorage.removeItem("sitindak_teacher_classes_v1");
+        localStorage.removeItem("sitindak_teacher_assessments_v1");
+      } catch {}
+    }
   }
 }
 
