@@ -74,7 +74,7 @@ export function getAllClasses(teacherId?: string): ClassRoom[] {
                 localStorage.setItem(key, raw);
               }
             }
-          } catch {}
+          } catch { }
         }
       }
     }

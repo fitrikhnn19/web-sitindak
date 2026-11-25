@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { MOCK_TOKENS, AssessmentToken } from "@/lib/assessment-mock-data";
 import { getAllAssessments, fetchAssessmentsFromSupabase } from "@/lib/assessment-management-store";
+import { createClient } from "@/lib/supabase/client";
 
 interface AssessmentTokenEntryProps {
   initialToken?: string;
@@ -33,6 +34,7 @@ export const AssessmentTokenEntry: React.FC<AssessmentTokenEntryProps> = ({
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [attemptCount, setAttemptCount] = useState(0);
   const [rateLimitedUntil, setRateLimitedUntil] = useState<number | null>(null);
+  const [isValidating, setIsValidating] = useState(false);
 
   useEffect(() => {
     fetchAssessmentsFromSupabase();
@@ -53,7 +55,7 @@ export const AssessmentTokenEntry: React.FC<AssessmentTokenEntryProps> = ({
   }, [rateLimitedUntil]);
 
   // Handle token verification
-  const handleVerifyToken = (e: React.FormEvent) => {
+  const handleVerifyToken = async (e: React.FormEvent) => {
     e.preventDefault();
 
     // Rate limit check
@@ -79,24 +81,72 @@ export const AssessmentTokenEntry: React.FC<AssessmentTokenEntryProps> = ({
       return;
     }
 
+    setIsValidating(true);
     let tokenData: AssessmentToken | undefined = undefined;
-    const storedAssessments = getAllAssessments();
-    const matchedAssessment = storedAssessments.find((a) => a.token.code === cleanCode);
-    if (matchedAssessment) {
-      tokenData = {
-        code: matchedAssessment.token.code,
-        title: matchedAssessment.title,
-        className: matchedAssessment.className,
-        teacherName: matchedAssessment.teacherName,
-        isActive: matchedAssessment.token.isActive,
-        maxUses: matchedAssessment.token.maxUses,
-        usedCount: matchedAssessment.token.usedCount,
-        opensAt: matchedAssessment.opensAt,
-        closesAt: matchedAssessment.closesAt,
-        status: matchedAssessment.status,
-        durationMinutes: matchedAssessment.durationMinutes !== undefined ? matchedAssessment.durationMinutes : 45,
-      };
+
+    // 1. Verifikasi langsung ke database Supabase secara real-time
+    try {
+      const supabase = createClient();
+      const { data: asm, error: asmErr } = await supabase
+        .from("assessments")
+        .select(`
+          id,
+          title,
+          token_code,
+          is_token_active,
+          max_uses,
+          used_count,
+          opens_at,
+          closes_at,
+          duration_minutes,
+          status,
+          classes ( name ),
+          profiles ( full_name )
+        `)
+        .eq("token_code", cleanCode)
+        .maybeSingle();
+
+      if (!asmErr && asm) {
+        tokenData = {
+          code: asm.token_code,
+          title: asm.title,
+          className: (asm.classes as any)?.name || "Kelas XI",
+          teacherName: (asm.profiles as any)?.full_name || "Guru",
+          isActive: asm.is_token_active,
+          maxUses: asm.max_uses,
+          usedCount: asm.used_count,
+          opensAt: asm.opens_at,
+          closesAt: asm.closes_at,
+          status: asm.status as any,
+          durationMinutes: asm.duration_minutes !== undefined ? asm.duration_minutes : 60,
+        };
+      }
+    } catch (err) {
+      console.warn("Gagal cek token ke Supabase, mencoba cache lokal:", err);
     }
+
+    // 2. Fallback jika offline/cache lokal
+    if (!tokenData) {
+      const storedAssessments = getAllAssessments();
+      const matchedAssessment = storedAssessments.find((a) => a.token.code === cleanCode);
+      if (matchedAssessment) {
+        tokenData = {
+          code: matchedAssessment.token.code,
+          title: matchedAssessment.title,
+          className: matchedAssessment.className,
+          teacherName: matchedAssessment.teacherName,
+          isActive: matchedAssessment.token.isActive,
+          maxUses: matchedAssessment.token.maxUses,
+          usedCount: matchedAssessment.token.usedCount,
+          opensAt: matchedAssessment.opensAt,
+          closesAt: matchedAssessment.closesAt,
+          status: matchedAssessment.status,
+          durationMinutes: matchedAssessment.durationMinutes !== undefined ? matchedAssessment.durationMinutes : 45,
+        };
+      }
+    }
+
+    setIsValidating(false);
 
     // 1. Kode token tidak ditemukan
     if (!tokenData) {
@@ -242,14 +292,14 @@ export const AssessmentTokenEntry: React.FC<AssessmentTokenEntryProps> = ({
 
             <button
               type="submit"
-              disabled={Boolean(rateLimitedUntil)}
+              disabled={Boolean(rateLimitedUntil) || isValidating}
               className={`w-full py-3 rounded-xl font-semibold text-sm shadow-sm transition-all flex items-center justify-center gap-2 ${
-                rateLimitedUntil
+                rateLimitedUntil || isValidating
                   ? "bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200"
                   : "bg-blue-600 hover:bg-blue-700 text-white"
               }`}
             >
-              <span>{rateLimitedUntil ? "Mohon Tunggu Sebentar..." : "Periksa Token"}</span>
+              <span>{isValidating ? "Memeriksa Token..." : rateLimitedUntil ? "Mohon Tunggu Sebentar..." : "Periksa Token"}</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           </form>
