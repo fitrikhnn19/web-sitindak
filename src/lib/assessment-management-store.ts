@@ -351,6 +351,40 @@ export async function fetchAssessmentsFromSupabase(explicitTeacherId?: string): 
     }
 
     if (data && Array.isArray(data)) {
+      // Ambil seluruh submission siswa riil dari Supabase untuk asesmen-asesmen ini
+      const assessmentIds = data.map((d: any) => d.id);
+      let submissionsByAssessment = new Map<string, StudentProgress[]>();
+
+      if (assessmentIds.length > 0) {
+        try {
+          const { data: allSubs, error: subsErr } = await supabase
+            .from("student_submissions")
+            .select("id, assessment_id, student_name, status, started_at, submitted_at, duration_minutes, paham_count, miskonsepsi_count, belum_paham_count")
+            .in("assessment_id", assessmentIds)
+            .order("created_at", { ascending: false });
+
+          if (!subsErr && allSubs && Array.isArray(allSubs)) {
+            allSubs.forEach((sub: any) => {
+              const list = submissionsByAssessment.get(sub.assessment_id) || [];
+              list.push({
+                id: sub.id,
+                name: sub.student_name,
+                status: (sub.status as "terkirim" | "berlangsung") || "terkirim",
+                startedAt: sub.started_at || undefined,
+                submittedAt: sub.submitted_at || undefined,
+                durationMinutes: sub.duration_minutes ?? undefined,
+                pahamCount: sub.paham_count ?? 0,
+                miskonsepsiCount: sub.miskonsepsi_count ?? 0,
+                belumPahamCount: sub.belum_paham_count ?? 0,
+              });
+              submissionsByAssessment.set(sub.assessment_id, list);
+            });
+          }
+        } catch (e) {
+          console.warn("Gagal mengambil submission siswa dari Supabase:", e);
+        }
+      }
+
       const currentCached = getAllAssessments(teacherId);
       const mapped: AssessmentItem[] = data.map((row: any) => {
         const matchingCached = currentCached.find(
@@ -373,12 +407,15 @@ export async function fetchAssessmentsFromSupabase(explicitTeacherId?: string): 
           "Guru";
 
         const maxUses = row.max_uses ?? 32;
-        const usedCount = row.used_count ?? 0;
 
-        const students =
-          matchingCached?.students && matchingCached.students.length > 0
-            ? matchingCached.students.filter((s) => s.status === "berlangsung" || s.status === "terkirim")
-            : [];
+        const remoteStudents = submissionsByAssessment.get(row.id) || [];
+        const students = remoteStudents.length > 0
+          ? remoteStudents
+          : matchingCached?.students && matchingCached.students.length > 0
+          ? matchingCached.students.filter((s) => s.status === "berlangsung" || s.status === "terkirim")
+          : [];
+
+        const usedCount = Math.max(row.used_count ?? 0, students.length);
 
         const scheduleStat = deriveScheduleStatus(row.opens_at, row.closes_at);
         const derivedStatus: "berjalan" | "draf" | "selesai" =

@@ -434,7 +434,7 @@ function AssessmentContent() {
   }).length;
   const incompleteCount = examQuestions.length - completeCount;
 
-  const handleConfirmSubmit = () => {
+  const handleConfirmSubmit = async () => {
     const nowIso = new Date().toISOString();
     setSubmittedAt(nowIso);
     setIsSubmitModalOpen(false);
@@ -454,7 +454,11 @@ function AssessmentContent() {
         questions: examQuestions,
       };
       localStorage.setItem(storageKey, JSON.stringify(payload));
-      submitStudentAssessmentToSupabase(payload);
+      try {
+        await submitStudentAssessmentToSupabase(payload);
+      } catch (err) {
+        console.warn("Gagal sinkronisasi submission ke Supabase, tersimpan di lokal:", err);
+      }
     }
 
     if (document.fullscreenElement && document.exitFullscreen) {

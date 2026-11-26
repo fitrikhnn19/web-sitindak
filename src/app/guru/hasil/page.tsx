@@ -69,9 +69,25 @@ function TeacherResultsContent() {
             className: a.className,
           }))
         );
+
+        // Jika belum ada token yang dipilih (misal guru masuk langsung ke /guru/hasil tanpa param URL)
+        const currentParam = searchParams.get("token");
+        if (!currentParam && !selectedToken) {
+          const firstToken = items[0].token.code;
+          setSelectedToken(firstToken);
+          setSummary(getAssessmentSummaryByToken(firstToken));
+          fetchAssessmentSummaryFromSupabase(firstToken).then((remote) => {
+            if (remote) {
+              setSummary(remote);
+              if (remote.students.length > 0) {
+                setSelectedStudentId(remote.students[0].id);
+              }
+            }
+          });
+        }
       }
     });
-  }, []);
+  }, [selectedToken, searchParams]);
 
   // Sync state with URL params & load fresh data from Supabase
   useEffect(() => {
